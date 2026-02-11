@@ -43,7 +43,7 @@ const AppRoutes = ({ isAuth, setIsAuth }) => {
         }
       />
 
-       <Route
+      <Route
         path="/attendance"
         element={
           isAuth ? (

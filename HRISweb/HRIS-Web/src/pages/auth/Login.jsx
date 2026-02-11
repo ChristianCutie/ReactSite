@@ -140,7 +140,7 @@ const Login = ({ setIsAuth }) => {
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={loading}
               >
-                {showPassword ? <EyeFill className="text-secondary" /> : <EyeSlashFill className="text-secondary" />}
+               {showPassword ? <EyeFill className="text-secondary" /> : <EyeSlashFill className="text-secondary" />}
               </button>
             </Form.Group>
 

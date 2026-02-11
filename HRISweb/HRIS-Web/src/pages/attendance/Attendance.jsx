@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Container,
   Card,
@@ -18,10 +17,10 @@ import AdminLayout from "../../components/layout/Adminlayout";
 import * as faceapi from "face-api.js";
 import api from "../../config/axios.js";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { Clock, DoorOpen, Lightbulb } from "react-bootstrap-icons"; 
+import { Clock, DoorOpen, Lightbulb } from "react-bootstrap-icons";
+import { useNavigate } from "react-router-dom";
 
 const Attendance = ({ setIsAuth }) => {
-  const navigate = useNavigate();
   const { isAuth } = useAuth();
 
   const videoRef = useRef(null);
@@ -37,7 +36,8 @@ const Attendance = ({ setIsAuth }) => {
   const [cameraStream, setCameraStream] = useState(null);
   const [toasts, setToasts] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
-const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const navigate = useNavigate();
 
   // ---------- Attendance summary state ----------
   const [summary, setSummary] = useState({
@@ -69,69 +69,78 @@ const [isInitialLoading, setIsInitialLoading] = useState(true);
   ======================== */
   useEffect(() => {
     const loadModels = async () => {
-      const MODEL_URL = "/models";
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-      setLoadingModels(false);
+      //const MODEL_URL = "/snl-hr-app/models";
+     // const MODEL_URL = `${import.meta.env.BASE_URL}models`;
+       const MODEL_URL = "https://justadudewhohacks.github.io/face-api.js/models";
+      try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+      } catch (error) {
+        console.error("Face-api model loading failed:", error);
+        showToast("Failed to load face detection models", "danger");
+      } finally {
+        setLoadingModels(false);
+      }
     };
     loadModels();
   }, []);
 
   /* ========================
-     FETCH ATTENDANCE DATA (uses your actual endpoint)
+     FETCH ATTENDANCE DATA
   ======================== */
   const fetchMyAttendance = async () => {
-  try {
-    setLoadingSummary(true);
-    const response = await api.get("/my-attendance");
-    const data = response.data;
+    try {
+      setLoadingSummary(true);
+      const response = await api.get("/my-attendance");
+      const data = response.data;
 
-    if (data.isSuccess) {
-      let clockInTime = null;
-      let hoursToday = 0;
-      let isClockedIn = false;
+      if (data.isSuccess) {
+        let clockInTime = null;
+        let hoursToday = 0;
+        let isClockedIn = false;
 
-      if (data.todayRecord) {
-        if (data.todayRecord.clock_in) {
-          const date = new Date(data.todayRecord.clock_in);
-          clockInTime = date.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          });
+        if (data.todayRecord) {
+          if (data.todayRecord.clock_in) {
+            const date = new Date(data.todayRecord.clock_in);
+            clockInTime = date.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            });
+          }
+          hoursToday = parseFloat(data.todayRecord.hours_worked) || 0;
+          isClockedIn =
+            data.todayRecord.clock_in && !data.todayRecord.clock_out;
         }
-        hoursToday = parseFloat(data.todayRecord.hours_worked) || 0;
-        isClockedIn = data.todayRecord.clock_in && !data.todayRecord.clock_out;
-      }
 
-      setSummary({
-        clockInTime,
-        hoursToday,
-        isClockedIn,
-        weekHours: parseFloat(data.thisWeekHours) || 0,
-        monthHours: parseFloat(data.thisMonthHours) || 0,
-        attendanceDays: parseInt(data.attendanceRate, 10) || 0,
-        onTimeRate: parseInt(data.onTimeRate, 10) || 95,
-        recentAttendance: data.recentAttendance || [],
-      });
+        setSummary({
+          clockInTime,
+          hoursToday,
+          isClockedIn,
+          weekHours: parseFloat(data.thisWeekHours) || 0,
+          monthHours: parseFloat(data.thisMonthHours) || 0,
+          attendanceDays: parseInt(data.attendanceRate, 10) || 0,
+          onTimeRate: parseInt(data.onTimeRate, 10) || 95,
+          recentAttendance: data.recentAttendance || [],
+        });
+      }
+    } catch (error) {
+      showToast("Failed to load attendance summary", "danger");
+    } finally {
+      setLoadingSummary(false);
+      setIsInitialLoading(false);
     }
-  } catch (error) {
-    showToast("Failed to load attendance summary", "danger");
-  } finally {
-    setLoadingSummary(false);
-    setIsInitialLoading(false);
-  }
-};
+  };
 
   // Redirect to login if not authenticated
-useEffect(() => {
+  useEffect(() => {
     if (!isAuth) {
       if (setIsAuth) setIsAuth(false);
-      navigate("/");
+      navigate("/snl-hr-app");
       return;
     }
-  }, [isAuth, navigate])
+  }, [isAuth, navigate, setIsAuth]);
 
   // Initial fetch
   useEffect(() => {
@@ -148,20 +157,65 @@ useEffect(() => {
 
   /* ========================
      CAMERA & FACE DETECTION
+     (Enhanced error handling)
   ======================== */
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
   const startCamera = async () => {
+    // iOS special case
+    if (isIOS && !navigator.mediaDevices) {
+      showToast(
+        "On iOS, please open this page in Safari to use the camera.",
+        "warning"
+      );
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // 1. Check browser support & secure context
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error(
+          "Camera API not available. Make sure you are on HTTPS://"
+        );
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+        },
+      });
+
       videoRef.current.srcObject = stream;
       setCameraStream(stream);
       videoRef.current.onloadedmetadata = () => startDetection();
     } catch (err) {
-      showToast("Camera access denied", "danger");
+      console.error("Camera error (full details):", err);
+
+      let errorMessage = "Camera access denied. ";
+      if (err.name === "NotAllowedError") {
+        errorMessage +=
+          "Please grant camera permission in your browser settings. Click the lock icon → Site settings → Camera → Allow.";
+      } else if (err.name === "NotFoundError") {
+        errorMessage += "No camera device found.";
+      } else if (err.name === "NotReadableError") {
+        errorMessage += "Camera is already in use by another application.";
+      } else if (err.name === "OverconstrainedError") {
+        errorMessage += "Camera does not meet the required constraints.";
+      } else if (err.message.includes("HTTPS")) {
+        errorMessage += "Your site must be served over HTTPS.";
+      } else {
+        errorMessage += err.message;
+      }
+
+      showToast(errorMessage, "danger");
     }
   };
 
   const stopCamera = () => {
-    if (cameraStream) cameraStream.getTracks().forEach((track) => track.stop());
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+    }
     if (detectionInterval.current) clearInterval(detectionInterval.current);
     if (captureTimeout.current) clearTimeout(captureTimeout.current);
   };
@@ -237,22 +291,32 @@ useEffect(() => {
       const mimeString = dataUrl.split(",")[0].split(":")[1].split(";")[0];
       const ab = new ArrayBuffer(byteString.length);
       const ia = new Uint8Array(ab);
-      for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+      for (let i = 0; i < byteString.length; i++)
+        ia[i] = byteString.charCodeAt(i);
       const file = new File([ab], "face.jpg", { type: mimeString });
       const formData = new FormData();
       formData.append("face_image", file);
 
-      const endpoint = summary.isClockedIn ? "/attendance/clock-out" : "/attendance/clock-in";
+      const endpoint = summary.isClockedIn
+        ? "/attendance/clock-out"
+        : "/attendance/clock-in";
       await api.post(endpoint, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      showToast(summary.isClockedIn ? "Clocked Out Successfully!" : "Clocked In Successfully!");
+      showToast(
+        summary.isClockedIn
+          ? "Clocked Out Successfully!"
+          : "Clocked In Successfully!"
+      );
       stopCamera();
       setShowFaceModal(false);
-      await fetchMyAttendance(); // refresh
+      await fetchMyAttendance();
     } catch (error) {
-      showToast(error.response?.data?.message || "Verification failed", "danger");
+      showToast(
+        error.response?.data?.message || "Verification failed",
+        "danger"
+      );
     } finally {
       setIsProcessing(false);
       captureTimeout.current = null;
@@ -265,7 +329,7 @@ useEffect(() => {
   const showToast = (message, type = "success") => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => removeToast(id), 4000);
+    setTimeout(() => removeToast(id), 6000); // longer timeout for detailed messages
   };
 
   const removeToast = (id) => {
@@ -323,8 +387,12 @@ useEffect(() => {
   const handleOpenAdjustModal = (record) => {
     setSelectedRecord(record);
     setAdjustmentForm({
-      adjustedClockIn: record.clock_in ? formatTimeForInput(record.clock_in) : "",
-      adjustedClockOut: record.clock_out ? formatTimeForInput(record.clock_out) : "",
+      adjustedClockIn: record.clock_in
+        ? formatTimeForInput(record.clock_in)
+        : "",
+      adjustedClockOut: record.clock_out
+        ? formatTimeForInput(record.clock_out)
+        : "",
       reason: "",
     });
     setShowAdjustModal(true);
@@ -333,7 +401,11 @@ useEffect(() => {
   const handleCloseAdjustModal = () => {
     setShowAdjustModal(false);
     setSelectedRecord(null);
-    setAdjustmentForm({ adjustedClockIn: "", adjustedClockOut: "", reason: "" });
+    setAdjustmentForm({
+      adjustedClockIn: "",
+      adjustedClockOut: "",
+      reason: "",
+    });
   };
 
   const handleAdjustmentFormChange = (e) => {
@@ -360,7 +432,7 @@ useEffect(() => {
       await api.post(`/request/adjustment/${selectedRecord.id}`, payload);
       showToast("Attendance adjustment submitted successfully!", "success");
       handleCloseAdjustModal();
-      await fetchMyAttendance(); // refresh recent records
+      await fetchMyAttendance();
     } catch (error) {
       showToast(
         error.response?.data?.message || "Error submitting adjustment request.",
@@ -388,6 +460,7 @@ useEffect(() => {
   const buttonVariant = summary.isClockedIn ? "danger" : "primary";
   const buttonText = summary.isClockedIn ? "Clock Out" : "Clock In";
 
+  // ---------- Initial loading screen ----------
   if (isInitialLoading) {
     return (
       <AdminLayout setIsAuth={setIsAuth}>
@@ -402,13 +475,14 @@ useEffect(() => {
   }
 
   return (
-    <AdminLayout setIsAuth={isAuth}>
+    <AdminLayout setIsAuth={setIsAuth}>
       <Container fluid className="attendance-container">
-          {/* Header */}
+        {/* Header */}
         <div className="attendance-header">
           <h2 className="attendance-title fw-bold">Attendance</h2>
         </div>
-        {/* ---------- HEADER (Date/Time + Badge) ---------- */}
+
+        {/* ---------- Date/Time + Badge ---------- */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h4 className="mb-0 text-muted attendance-date">{formattedDate}</h4>
@@ -438,16 +512,29 @@ useEffect(() => {
               <Row className="align-items-center">
                 <Col md={6}>
                   <div className="mb-3">
-                    <small className="text-uppercase text-muted">CLOCK IN TIME</small>
+                    <small className="text-uppercase text-muted">
+                      CLOCK IN TIME
+                    </small>
                     <h3 className="fw-bold">{summary.clockInTime || "---"}</h3>
                   </div>
                   <div>
-                    <small className="text-uppercase text-muted">HOURS TODAY</small>
-                    <h3 className="fw-bold">{summary.hoursToday.toFixed(2)} hrs</h3>
+                    <small className="text-uppercase text-muted">
+                      HOURS TODAY
+                    </small>
+                    <h3 className="fw-bold">
+                      {summary.hoursToday.toFixed(2)} hrs
+                    </h3>
                   </div>
                 </Col>
                 <Col md={1} className="d-none d-md-block text-center">
-                  <div style={{ width: 2, height: 80, background: "#dee2e6", margin: "auto" }} />
+                  <div
+                    style={{
+                      width: 2,
+                      height: 80,
+                      background: "#dee2e6",
+                      margin: "auto",
+                    }}
+                  />
                 </Col>
                 <Col md={5} className="text-md-end mt-4 mt-md-0">
                   <div className="mb-3">
@@ -472,7 +559,7 @@ useEffect(() => {
           </Card.Body>
         </Card>
 
-        {/* ---------- SUMMARY CARDS (THIS WEEK / MONTH / ATTENDANCE / ON TIME) ---------- */}
+        {/* ---------- SUMMARY CARDS ---------- */}
         <Row className="g-4 mb-5">
           <Col sm={6} md={3}>
             <Card className="text-center border-0 shadow-sm rounded-4">
@@ -539,7 +626,9 @@ useEffect(() => {
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>
                   <h4 className="fw-bold mb-1">Recent Attendance</h4>
-                  <p className="text-muted mb-0">Your recent attendance records</p>
+                  <p className="text-muted mb-0">
+                    Your recent attendance records
+                  </p>
                 </div>
               </div>
 
@@ -557,13 +646,17 @@ useEffect(() => {
                   <tbody>
                     {summary.recentAttendance.map((record, index) => (
                       <tr key={record.id || index}>
-                        <td className="fw-medium">{formatDate(record.clock_in)}</td>
+                        <td className="fw-medium">
+                          {formatDate(record.clock_in)}
+                        </td>
                         <td>
                           <Badge bg="success" pill className="px-3 py-2">
                             Present
                           </Badge>
                         </td>
-                        <td>{formatTimeRange(record.clock_in, record.clock_out)}</td>
+                        <td>
+                          {formatTimeRange(record.clock_in, record.clock_out)}
+                        </td>
                         <td>{formatHours(record.hours_worked)} hrs</td>
                         <td>
                           <Button
@@ -588,7 +681,9 @@ useEffect(() => {
         {!loadingSummary && summary.recentAttendance.length === 0 && (
           <Card className="border-0 shadow-sm rounded-4 mb-4">
             <Card.Body className="p-5 text-center">
-              <p className="text-muted mb-0">No recent attendance records found.</p>
+              <p className="text-muted mb-0">
+                No recent attendance records found.
+              </p>
             </Card.Body>
           </Card>
         )}
@@ -619,12 +714,15 @@ useEffect(() => {
                         <strong>{formatTime(selectedRecord.clock_in)}</strong>
                       </div>
                       <small className="text-muted">
-                        {new Date(selectedRecord.clock_in).toLocaleDateString("en-US", {
-                          weekday: "short",
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
+                        {new Date(selectedRecord.clock_in).toLocaleDateString(
+                          "en-US",
+                          {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          }
+                        )}
                       </small>
                     </div>
                   </Col>
@@ -659,7 +757,9 @@ useEffect(() => {
                   />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-bold">Adjusted Clock Out</Form.Label>
+                  <Form.Label className="fw-bold">
+                    Adjusted Clock Out
+                  </Form.Label>
                   <Form.Control
                     type="time"
                     name="adjustedClockOut"
@@ -676,7 +776,9 @@ useEffect(() => {
               {/* Reason for Adjustment */}
               <div className="mb-4">
                 <Form.Group>
-                  <Form.Label className="fw-bold">Reason for Adjustment</Form.Label>
+                  <Form.Label className="fw-bold">
+                    Reason for Adjustment
+                  </Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={4}
@@ -709,7 +811,7 @@ useEffect(() => {
         </Modal.Footer>
       </Modal>
 
-      {/* ---------- FACE VERIFICATION MODAL (unchanged) ---------- */}
+      {/* ---------- FACE VERIFICATION MODAL ---------- */}
       <Modal
         show={showFaceModal}
         onHide={() => {
@@ -731,7 +833,7 @@ useEffect(() => {
                 ref={videoRef}
                 autoPlay
                 playsInline
-                style={{ width: "100%", borderRadius: 10 }}
+                style={{ width: "100%", borderRadius: 10, transform: 'scaleX(-1)' }}
               />
               <canvas
                 ref={overlayRef}
@@ -741,6 +843,7 @@ useEffect(() => {
                   left: 0,
                   width: "100%",
                   height: "100%",
+                  transform: 'scaleX(-1)'
                 }}
               />
               <div className="mt-3">
@@ -761,14 +864,18 @@ useEffect(() => {
       </Modal>
 
       {/* ---------- TOAST NOTIFICATIONS ---------- */}
-      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 9999 }}>
+      <ToastContainer
+        position="top-end"
+        className="p-3"
+        style={{ zIndex: 9999 }}
+      >
         {toasts.map((toast) => (
           <Toast
             key={toast.id}
             bg={toast.type}
             show={true}
             onClose={() => removeToast(toast.id)}
-            delay={4000}
+            delay={6000}
             autohide
           >
             <Toast.Body className="text-white">{toast.message}</Toast.Body>

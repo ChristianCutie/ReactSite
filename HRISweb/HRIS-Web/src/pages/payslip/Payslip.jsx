@@ -335,7 +335,7 @@ const Payslip = ({ setIsAuth }) => {
                 );
               })
               .map((payslip, index) => (
-                <Col key={payslip.record_id} lg={4} md={6} sm={12} className="mb-4">
+                <Col key={payslip.record_id} lg={4} md={6} className="mb-4">
                   <Card className="payslip-card h-100 shadow-sm rounded-3">
                     <Card.Header className="payslip-card-header">
                       <Card.Title className="payslip-card-title mb-0">
