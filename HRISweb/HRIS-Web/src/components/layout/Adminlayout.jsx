@@ -156,12 +156,12 @@ const AdminLayout = ({ children, setIsAuth }) => {
             <h5 className="navbar-title">Employee Dashboard</h5>
             <div className="navbar-profile">
               <div className="profile-info">
-                <p className="profile-name text-end">
+                <p className="profile-name text-end d-none d-md-block">
                   {displayData?.first_name && displayData?.last_name
                     ? `${displayData.first_name} ${displayData.last_name}`
                     : "Loading..."}
                 </p>
-                <small className="text-muted">{displayData?.email || "Loading..."}</small>
+                <small className="text-muted d-none d-md-block">{displayData?.email || "Loading..."}</small>
               </div>
               <Dropdown className="profile-dropdown" align="end">
                 <Dropdown.Toggle

@@ -84,7 +84,7 @@ const Login = ({ setIsAuth }) => {
       setLoading(false);
       showToast("Login successful! Redirecting to dashboard...", "success");
       
-      setPendingRedirect("/snl-hr-app/dashboard");
+      setPendingRedirect("/dashboard");
 
     } catch (error) {
       console.error("Login error:", error);

@@ -323,7 +323,7 @@ const Payslip = ({ setIsAuth }) => {
           {/* End of Payroll Summary */}
 
           {/* Payslip Cards - 3 Column Layout */}
-          <Row className="payslip-cards-container mt-4">
+          <Row className=" mt-4">
             {payslips
               .filter((payslip) => {
                 const searchLower = searchTerm.toLowerCase();

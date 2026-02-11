@@ -25,11 +25,11 @@ const Sidebar = ({ show, handleClose }) => {
   }
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'speedometer2', path: '/snl-hr-app/dashboard' },
-    { id: 'attendance', label: 'Attendance', icon: 'calendar-check', path: '/snl-hr-app/attendance' },
-    { id: 'leave', label: 'Leave', icon: 'calendar-x', path: '/snl-hr-app/leave' },
-    { id: 'loan', label: 'Loan', icon: 'cash-coin', path: '/snl-hr-app/loan' },
-    { id: 'payslip', label: 'Payslip', icon: 'file-earmark-text', path: '/snl-hr-app/payslip' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'speedometer2', path: '/dashboard' },
+    { id: 'attendance', label: 'Attendance', icon: 'calendar-check', path: '/attendance' },
+    { id: 'leave', label: 'Leave', icon: 'calendar-x', path: '/leave' },
+    { id: 'loan', label: 'Loan', icon: 'cash-coin', path: '/loan' },
+    { id: 'payslip', label: 'Payslip', icon: 'file-earmark-text', path: '/payslip' },
   ]
 
   const isActive = (path) => {

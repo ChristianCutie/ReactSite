@@ -410,6 +410,9 @@
     font-size: 0.7rem;
   }
 }
+video {
+  transform: scaleX(-1);
+}
 
 
 

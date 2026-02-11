@@ -117,7 +117,7 @@ const AdminLayout = ({ children, setIsAuth }) => {
         setLoading(false);
 
         // Force redirect to login page
-        navigate("/snl-hr-app", { replace: true });
+        navigate("/", { replace: true });
       }, 1500);
     }
   };
@@ -185,8 +185,8 @@ const AdminLayout = ({ children, setIsAuth }) => {
                 <Dropdown.Menu className="profile-dropdown-menu">
                   <Dropdown.Item
                     as={Link}
-                    to="/snl-hr-app/profile"
-                    className={`dropdown-item-custom ${isActive("/snl-hr-app/profile") ? "active" : ""}`}
+                    to="/profile"
+                    className={`dropdown-item-custom ${isActive("/profile") ? "active" : ""}`}
                   >
                     <PersonLinesFill size={16} />
                     <span>Profile</span>
