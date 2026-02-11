@@ -1,0 +1,21 @@
+
+.appvide{
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.appcanvas{
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.myapp{
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}

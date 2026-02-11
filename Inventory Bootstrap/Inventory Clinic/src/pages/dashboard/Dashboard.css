@@ -1,0 +1,106 @@
+.stat-card {
+  border: none;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.stat-card .card-body {
+  padding: 20px;
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.2;
+}
+
+.stat-icon-primary {
+  background-color: #007bff;
+}
+
+.stat-icon-success {
+  background-color: #28a745;
+}
+
+.stat-icon-info {
+  background-color: #17a2b8;
+}
+
+.stat-icon-warning {
+  background-color: #ffc107;
+}
+
+.stat-card .table {
+  margin-bottom: 0;
+}
+
+.stat-card .table thead {
+  background-color: #f8f9fa;
+}
+
+.stat-card .table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.stat-card .badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  font-weight: 600;
+}
+
+/* Card styling */
+.card {
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.card-header {
+  border-radius: 10px 10px 0 0;
+  padding: 15px 20px;
+  background-color: #f8f9fa !important;
+}
+
+.card-header h5 {
+  color: #333;
+  font-weight: 600;
+  margin: 0;
+}
+
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 10px 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-outline-primary {
+  color: #667eea;
+  border-color: #667eea;
+}
+
+.btn-outline-primary:hover {
+  background-color: #667eea;
+  border-color: #667eea;
+}
+
+h1 {
+  color: #1e3a8a;
+}
