@@ -1,0 +1,97 @@
+/* Add these styles to your existing Attendance.css file */
+
+/* Toast Styles */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.toast {
+  min-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.toast-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.75rem 1rem;
+}
+
+.toast-body {
+  padding: 1rem;
+}
+
+/* Success Toast */
+.toast.bg-success .toast-header {
+  background-color: rgba(40, 167, 69, 0.9);
+  color: white;
+}
+
+.toast.bg-success .toast-body {
+  background-color: #28a745;
+}
+
+/* Danger Toast */
+.toast.bg-danger .toast-header {
+  background-color: rgba(220, 53, 69, 0.9);
+  color: white;
+}
+
+.toast.bg-danger .toast-body {
+  background-color: #dc3545;
+}
+
+/* Toast close button */
+.toast-header .btn-close {
+  filter: invert(1) brightness(100%);
+  opacity: 0.8;
+}
+
+.toast-header .btn-close:hover {
+  opacity: 1;
+}
+
+/* Toast animation */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.toast.show {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.toast.hide {
+  animation: slideOutRight 0.3s ease-in;
+}
+.glb-toast-danger {
+background: rgba(255, 255, 255, 0.25)!important;
+backdrop-filter: blur(10px)!important;
+border-left: 3px solid #dc3545 !important;
+}
+.glb-toast-success {
+background:#fff!important;
+backdrop-filter: blur(10px)!important;
+border-left: 3px solid #28a745 !important;
+}

@@ -1,0 +1,28 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.content-wrapper {
+  flex: 1;
+  margin-left: 260px;
+  padding: 30px;
+  transition: margin-left 0.3s ease;
+  overflow-y: auto;
+}
+
+/* Responsive - Tablet and Below */
+@media (max-width: 992px) {
+  .content-wrapper {
+    margin-left: 0;
+    padding: 20px;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 576px) {
+  .content-wrapper {
+    padding: 70px 16px 20px 16px;
+  }
+}

@@ -1,0 +1,148 @@
+/* Mobile Offcanvas Sidebar */
+.sidebar-offcanvas {
+  width: 280px !important;
+}
+
+.sidebar-header {
+  background-color: #2563EB;
+  border-bottom: 2px solid #2563EB;
+  padding: 1.5rem !important;
+}
+
+.sidebar-title {
+  color: white;
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.sidebar-nav {
+  padding: 1rem 0;
+}
+
+.sidebar-link {
+  color: #333;
+  padding: 0.875rem 1.5rem;
+  font-weight: 500;
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sidebar-link:hover {
+  background-color: #f0f4f8;
+  color: #2563EB;
+  border-left-color: #2563EB;
+}
+
+.sidebar-link.active {
+  background-color: #e7f1ff;
+  color: #2563EB;
+  border-left-color: #2563EB;
+}
+
+.sidebar-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.sidebar-link i {
+  font-size: 1.1rem;
+  width: 20px;
+}
+
+/* Desktop Sidebar */
+.sidebar-desktop {
+  display: none;
+  width: 260px;
+  height: 100vh;
+  background-color: #f8f9fa;
+  border-right: 1px solid #e9ecef;
+  position: fixed;
+  left: 0;
+  top: 0;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.sidebar-header-desktop {
+  background-color: #2563EB;
+  padding: 1rem;
+  border-bottom: 2px solid #2563EB;
+}
+
+.sidebar-footer {
+  padding: 1rem 0;
+  margin-top: auto;
+  border-top: 1px solid #e9ecef;
+}
+
+.logout-link {
+  color: #dc3545;
+}
+
+.logout-link:hover {
+  color: #c82333;
+  background-color: #ffe5e5;
+}
+
+/* Responsive Design */
+@media (min-width: 992px) {
+  .sidebar-desktop {
+    display: flex;
+  }
+
+  .sidebar-offcanvas {
+    display: none;
+  }
+
+  /* Adjust body content when sidebar is visible */
+  body {
+    margin-left: 260px;
+  }
+
+  .main-content {
+    margin-left: 260px;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .sidebar-offcanvas .offcanvas-header {
+    border-bottom: none;
+  }
+
+  .sidebar-link {
+    padding: 0.875rem 1rem;
+  }
+}
+
+/* Offcanvas Body Custom Styling */
+.offcanvas-body {
+  padding: 0 !important;
+  overflow-y: auto;
+}
+
+.sidebar-offcanvas .btn-close {
+  filter: brightness(0) invert(1);
+  opacity: 1 !important;
+}
+
+.sidebar-offcanvas .btn-close:focus {
+  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+}
+
+.sidebar-link span {
+  word-break: break-word;
+}
+.sidebar-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}

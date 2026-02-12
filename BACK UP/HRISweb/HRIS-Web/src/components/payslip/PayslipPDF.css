@@ -1,0 +1,190 @@
+.pdf-container {
+  width: 8.5in;
+  height: 11in;
+  background: #fff;
+  padding: 0.4in;
+  font-family: Arial, sans-serif;
+  color: #000;
+  margin: 0 auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styles */
+.pdf-header {
+  text-align: center;
+  margin-bottom: 0.2in;
+}
+
+.pdf-company-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.pdf-company-address {
+  margin: 2px 0;
+  font-size: 11px;
+  color: #555;
+}
+
+.pdf-company-contact {
+  margin: 2px 0;
+  font-size: 11px;
+  color: #555;
+}
+
+.pdf-divider {
+  border: 1px solid #333;
+  margin: 0.15in 0;
+}
+
+/* Period Title */
+.pdf-period-title {
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0.2in 0;
+  color: #333;
+}
+
+/* Employee Details Grid */
+.pdf-details-grid {
+  margin: 0.2in 0;
+  font-size: 11px;
+}
+
+.pdf-detail-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3in;
+  margin-bottom: 0.1in;
+}
+
+.pdf-detail-item {
+  display: flex;
+  gap: 0.1in;
+}
+
+.pdf-detail-label {
+  font-weight: bold;
+  color: #333;
+  min-width: 100px;
+}
+
+.pdf-detail-value {
+  color: #555;
+}
+
+/* Tables Container */
+.pdf-tables-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.2in;
+  margin: 0.2in 0;
+}
+
+.pdf-table-section {
+  font-size: 10px;
+}
+
+.pdf-table-header {
+  background: #ddd;
+  padding: 0.08in;
+  margin: 0;
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid #999;
+}
+
+.pdf-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0;
+}
+
+.pdf-container thead {
+  background: #f5f5f5;
+  border: 1px solid #999;
+}
+
+.pdf-container thead th {
+  padding: 0.08in;
+  text-align: left;
+  font-weight: bold;
+  border: 1px solid #999;
+  font-size: 10px;
+}
+
+.pdf-container tbody td {
+  padding: 0.08in;
+  border: 1px solid #999;
+  font-size: 10px;
+}
+
+.pdf-container tbody tr:last-child td {
+  border-top: 2px solid #333;
+}
+
+.pdf-total-row {
+  background: #f9f9f9;
+  font-weight: bold;
+}
+
+.pdf-total-row td {
+  border-top: 1px solid #333;
+  border-bottom: 2px solid #333;
+}
+
+/* Net Pay Box */
+.pdf-net-pay-box {
+  border: 2px solid #333;
+  padding: 0.15in;
+  text-align: center;
+  margin: 0.2in 0;
+  background: #fafafa;
+}
+
+.pdf-net-pay-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.pdf-net-pay-note {
+  margin: 0.05in 0 0 0;
+  font-size: 10px;
+  color: #555;
+}
+
+/* Signature Section */
+.pdf-signature-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1in;
+  margin: 0.3in 0;
+  padding-top: 0.3in;
+}
+
+.pdf-signature-line {
+  border-top: 1px solid #333;
+  padding-top: 0.05in;
+  text-align: center;
+  font-size: 10px;
+}
+
+.pdf-signature-line p {
+  margin: 0;
+}
+
+/* Footer */
+.pdf-footer {
+  text-align: center;
+  font-size: 9px;
+  color: #888;
+  margin: 0.2in 0 0 0;
+  border-top: 1px solid #ddd;
+  padding-top: 0.1in;
+}
