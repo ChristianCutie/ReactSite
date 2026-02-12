@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Container,
   Card,
@@ -52,6 +52,9 @@ const Attendance = ({ setIsAuth }) => {
   });
   const [loadingSummary, setLoadingSummary] = useState(true);
 
+  // ---------- Raw clock-in timestamp for live calculation ----------
+  const [clockInTimestamp, setClockInTimestamp] = useState(null);
+
   // ---------- DTR Adjustment Modal ----------
   const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -69,9 +72,7 @@ const Attendance = ({ setIsAuth }) => {
   ======================== */
   useEffect(() => {
     const loadModels = async () => {
-      //const MODEL_URL = "/snl-hr-app/models";
-     // const MODEL_URL = `${import.meta.env.BASE_URL}models`;
-       const MODEL_URL = "https://justadudewhohacks.github.io/face-api.js/models";
+      const MODEL_URL = "https://justadudewhohacks.github.io/face-api.js/models";
       try {
         await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
         await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
@@ -99,6 +100,7 @@ const Attendance = ({ setIsAuth }) => {
         let clockInTime = null;
         let hoursToday = 0;
         let isClockedIn = false;
+        let rawTimestamp = null;
 
         if (data.todayRecord) {
           if (data.todayRecord.clock_in) {
@@ -108,6 +110,7 @@ const Attendance = ({ setIsAuth }) => {
               minute: "2-digit",
               hour12: true,
             });
+            rawTimestamp = data.todayRecord.clock_in; // store raw ISO string
           }
           hoursToday = parseFloat(data.todayRecord.hours_worked) || 0;
           isClockedIn =
@@ -124,6 +127,9 @@ const Attendance = ({ setIsAuth }) => {
           onTimeRate: parseInt(data.onTimeRate, 10) || 95,
           recentAttendance: data.recentAttendance || [],
         });
+
+        // Store the raw timestamp for live calculation, or clear if not clocked in
+        setClockInTimestamp(isClockedIn ? rawTimestamp : null);
       }
     } catch (error) {
       showToast("Failed to load attendance summary", "danger");
@@ -156,13 +162,24 @@ const Attendance = ({ setIsAuth }) => {
   }, []);
 
   /* ========================
+     LIVE HOURS CALCULATION (overrides API when clocked in)
+  ======================== */
+  const liveHoursToday = useMemo(() => {
+    if (summary.isClockedIn && clockInTimestamp) {
+      const now = currentDateTime;
+      const clockInDate = new Date(clockInTimestamp);
+      const diffMs = now - clockInDate;
+      return diffMs / (1000 * 60 * 60);
+    }
+    return summary.hoursToday;
+  }, [summary.isClockedIn, clockInTimestamp, currentDateTime, summary.hoursToday]);
+
+  /* ========================
      CAMERA & FACE DETECTION
-     (Enhanced error handling)
   ======================== */
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   const startCamera = async () => {
-    // iOS special case
     if (isIOS && !navigator.mediaDevices) {
       showToast(
         "On iOS, please open this page in Safari to use the camera.",
@@ -172,7 +189,6 @@ const Attendance = ({ setIsAuth }) => {
     }
 
     try {
-      // 1. Check browser support & secure context
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error(
           "Camera API not available. Make sure you are on HTTPS://"
@@ -311,6 +327,7 @@ const Attendance = ({ setIsAuth }) => {
       );
       stopCamera();
       setShowFaceModal(false);
+      setClockInTimestamp(null); // clear timestamp after clock-out
       await fetchMyAttendance();
     } catch (error) {
       showToast(
@@ -329,7 +346,7 @@ const Attendance = ({ setIsAuth }) => {
   const showToast = (message, type = "success") => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => removeToast(id), 6000); // longer timeout for detailed messages
+    setTimeout(() => removeToast(id), 6000);
   };
 
   const removeToast = (id) => {
@@ -522,7 +539,7 @@ const Attendance = ({ setIsAuth }) => {
                       HOURS TODAY
                     </small>
                     <h3 className="fw-bold">
-                      {summary.hoursToday.toFixed(2)} hrs
+                      {liveHoursToday.toFixed(2)} hrs
                     </h3>
                   </div>
                 </Col>
@@ -702,7 +719,6 @@ const Attendance = ({ setIsAuth }) => {
         <Modal.Body>
           {selectedRecord && (
             <>
-              {/* Original Times */}
               <div className="mb-4">
                 <h6 className="fw-bold mb-3">Original Times</h6>
                 <Row>
@@ -744,7 +760,6 @@ const Attendance = ({ setIsAuth }) => {
 
               <hr />
 
-              {/* Adjusted Times */}
               <div className="mb-4">
                 <h6 className="fw-bold mb-3">Adjusted Times</h6>
                 <Form.Group className="mb-3">
@@ -773,7 +788,6 @@ const Attendance = ({ setIsAuth }) => {
                 </small>
               </div>
 
-              {/* Reason for Adjustment */}
               <div className="mb-4">
                 <Form.Group>
                   <Form.Label className="fw-bold">
@@ -790,7 +804,6 @@ const Attendance = ({ setIsAuth }) => {
                 </Form.Group>
               </div>
 
-              {/* Info Message */}
               <div className="alert alert-info d-flex gap-2 mb-0">
                 <span>💡</span>
                 <span>
