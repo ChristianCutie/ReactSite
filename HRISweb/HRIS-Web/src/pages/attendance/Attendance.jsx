@@ -19,6 +19,7 @@ import api from "../../config/axios.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { Clock, DoorOpen, Lightbulb } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
+import "./Attendance.css";
 
 const Attendance = ({ setIsAuth }) => {
   const { isAuth } = useAuth();
@@ -26,9 +27,13 @@ const Attendance = ({ setIsAuth }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const overlayRef = useRef(null);
+  const hasFetched = useRef(false); 
 
   const detectionInterval = useRef(null);
   const captureTimeout = useRef(null);
+
+  // Flag to prevent multiple auto clock‑out requests
+  const autoClockOutTriggered = useRef(false);
 
   const [showFaceModal, setShowFaceModal] = useState(false);
   const [faceAligned, setFaceAligned] = useState(false);
@@ -72,7 +77,8 @@ const Attendance = ({ setIsAuth }) => {
   ======================== */
   useEffect(() => {
     const loadModels = async () => {
-      const MODEL_URL = "https://justadudewhohacks.github.io/face-api.js/models";
+      const MODEL_URL =
+        "https://justadudewhohacks.github.io/face-api.js/models";
       try {
         await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
         await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
@@ -151,6 +157,8 @@ const Attendance = ({ setIsAuth }) => {
   // Initial fetch
   useEffect(() => {
     if (isAuth) {
+       if (hasFetched.current) return;
+    hasFetched.current = true;
       fetchMyAttendance();
     }
   }, [isAuth]);
@@ -172,7 +180,36 @@ const Attendance = ({ setIsAuth }) => {
       return diffMs / (1000 * 60 * 60);
     }
     return summary.hoursToday;
-  }, [summary.isClockedIn, clockInTimestamp, currentDateTime, summary.hoursToday]);
+  }, [
+    summary.isClockedIn,
+    clockInTimestamp,
+    currentDateTime,
+    summary.hoursToday,
+  ]);
+
+  /* ========================
+     AUTO CLOCK‑OUT AFTER 15 HOURS
+  ======================== */
+  const autoClockOut = async () => {
+    autoClockOutTriggered.current = true;
+    try {
+      await api.post('/attendance/clock-out');
+      showToast('Auto clocked out after 15 hours', 'info');
+      await fetchMyAttendance();               // refresh summary
+    } catch (error) {
+      showToast(
+        'Auto clock-out failed: ' + (error.response?.data?.message || error.message),
+        'danger'
+      );
+      // flag stays true to avoid infinite loops – user can retry manually
+    }
+  };
+
+  useEffect(() => {
+    if (summary.isClockedIn && liveHoursToday >= 15 && !autoClockOutTriggered.current) {
+      autoClockOut();
+    }
+  }, [liveHoursToday, summary.isClockedIn]);
 
   /* ========================
      CAMERA & FACE DETECTION
@@ -183,7 +220,7 @@ const Attendance = ({ setIsAuth }) => {
     if (isIOS && !navigator.mediaDevices) {
       showToast(
         "On iOS, please open this page in Safari to use the camera.",
-        "warning"
+        "warning",
       );
       return;
     }
@@ -191,7 +228,7 @@ const Attendance = ({ setIsAuth }) => {
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error(
-          "Camera API not available. Make sure you are on HTTPS://"
+          "Camera API not available. Make sure you are on HTTPS://",
         );
       }
 
@@ -229,11 +266,24 @@ const Attendance = ({ setIsAuth }) => {
   };
 
   const stopCamera = () => {
+    // Stop all media tracks
     if (cameraStream) {
       cameraStream.getTracks().forEach((track) => track.stop());
+      setCameraStream(null);
     }
-    if (detectionInterval.current) clearInterval(detectionInterval.current);
-    if (captureTimeout.current) clearTimeout(captureTimeout.current);
+    // Clear the video element's source
+    if (videoRef.current && videoRef.current.srcObject) {
+      videoRef.current.srcObject = null;
+    }
+    // Clear intervals and timeouts
+    if (detectionInterval.current) {
+      clearInterval(detectionInterval.current);
+      detectionInterval.current = null;
+    }
+    if (captureTimeout.current) {
+      clearTimeout(captureTimeout.current);
+      captureTimeout.current = null;
+    }
   };
 
   const drawGuide = () => {
@@ -259,7 +309,7 @@ const Attendance = ({ setIsAuth }) => {
       drawGuide();
       const detection = await faceapi.detectSingleFace(
         videoRef.current,
-        new faceapi.TinyFaceDetectorOptions()
+        new faceapi.TinyFaceDetectorOptions(),
       );
       if (detection) {
         const box = detection.box;
@@ -323,8 +373,17 @@ const Attendance = ({ setIsAuth }) => {
       showToast(
         summary.isClockedIn
           ? "Clocked Out Successfully!"
-          : "Clocked In Successfully!"
+          : "Clocked In Successfully!",
       );
+
+      // If we just clocked in, reset the auto‑clock‑out flag for the new session
+      if (!summary.isClockedIn) {
+        autoClockOutTriggered.current = false;
+      } else {
+        // If we just clocked out manually, also reset the flag (optional)
+        autoClockOutTriggered.current = false;
+      }
+
       stopCamera();
       setShowFaceModal(false);
       setClockInTimestamp(null); // clear timestamp after clock-out
@@ -332,7 +391,7 @@ const Attendance = ({ setIsAuth }) => {
     } catch (error) {
       showToast(
         error.response?.data?.message || "Verification failed",
-        "danger"
+        "danger",
       );
     } finally {
       setIsProcessing(false);
@@ -453,7 +512,7 @@ const Attendance = ({ setIsAuth }) => {
     } catch (error) {
       showToast(
         error.response?.data?.message || "Error submitting adjustment request.",
-        "danger"
+        "danger",
       );
       handleCloseAdjustModal();
     }
@@ -502,8 +561,8 @@ const Attendance = ({ setIsAuth }) => {
         {/* ---------- Date/Time + Badge ---------- */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
-            <h4 className="mb-0 text-muted attendance-date">{formattedDate}</h4>
-            <h5 className="fw-bold attendance-time">{formattedTime}</h5>
+            <h5 className="mb-0 attendance-date">{formattedDate}</h5>
+            <p className="attendance-time text-muted">{formattedTime}</p>
           </div>
           {loadingSummary ? (
             <Spinner animation="border" size="sm" />
@@ -538,9 +597,7 @@ const Attendance = ({ setIsAuth }) => {
                     <small className="text-uppercase text-muted">
                       HOURS TODAY
                     </small>
-                    <h3 className="fw-bold">
-                      {liveHoursToday.toFixed(2)} hrs
-                    </h3>
+                    <h3 className="fw-bold">{liveHoursToday.toFixed(2)} hrs</h3>
                   </div>
                 </Col>
                 <Col md={1} className="d-none d-md-block text-center">
@@ -560,8 +617,8 @@ const Attendance = ({ setIsAuth }) => {
                   </div>
                   <Button
                     variant={buttonVariant}
-                    size="lg"
-                    className="px-5 py-3 rounded-3"
+                    size="md"
+                    className=" rounded-3"
                     onClick={() => {
                       setShowFaceModal(true);
                       setTimeout(startCamera, 500);
@@ -737,7 +794,7 @@ const Attendance = ({ setIsAuth }) => {
                             month: "short",
                             day: "numeric",
                             year: "numeric",
-                          }
+                          },
                         )}
                       </small>
                     </div>
@@ -846,7 +903,11 @@ const Attendance = ({ setIsAuth }) => {
                 ref={videoRef}
                 autoPlay
                 playsInline
-                style={{ width: "100%", borderRadius: 10, transform: 'scaleX(-1)' }}
+                style={{
+                  width: "100%",
+                  borderRadius: 10,
+                  transform: "scaleX(-1)",
+                }}
               />
               <canvas
                 ref={overlayRef}
@@ -856,7 +917,7 @@ const Attendance = ({ setIsAuth }) => {
                   left: 0,
                   width: "100%",
                   height: "100%",
-                  transform: 'scaleX(-1)'
+                  transform: "scaleX(-1)",
                 }}
               />
               <div className="mt-3">

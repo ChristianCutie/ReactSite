@@ -21,6 +21,24 @@
   font-size: 1rem;
   margin: 0;
 }
+/* Announcements offcanvas */
+.announcement-details {
+  padding: 1.5rem !important;
+}
+.announcement-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+.announcement-title {
+  color: #003d82;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+}
+.announcement-content {
+  color: #333;
+  font-size: 0.95rem;
+}
 
 /* Stat Cards */
 .stat-card {
@@ -167,6 +185,95 @@
   font-weight: 700;
   margin: 0;
   font-size: 1.1rem;
+}
+
+/* Attendance Chart Modern Design */
+.attendance-chart-wrapper {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.attendance-stats-container {
+  padding: 0 0.5rem;
+}
+
+.attendance-stat-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.attendance-stat-card:hover {
+  border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.stat-color-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.stat-color-indicator.present {
+  background-color: #28a745;
+}
+
+.stat-color-indicator.absent {
+  background-color: #dc3545;
+}
+
+.stat-header h6 {
+  color: #003d82;
+  font-weight: 700;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.stat-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.stat-content h3 {
+  color: #003d82;
+  font-weight: 700;
+  margin: 0;
+  font-size: 2rem;
+}
+
+.stat-percentage {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.percentage-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.percentage-badge.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.percentage-badge.danger {
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 /* Attendance Overview */
@@ -393,4 +500,118 @@
   .quick-stat-item i {
     font-size: 1.5rem;
   }
+}
+/* Payslip Card Styles */
+.payslip-card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.payslip-card:hover {
+  border-color: #2563eb !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+.payslip-info {
+  padding: 0.5rem 0;
+}
+
+.payslip-info small {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+}
+
+.payslip-info h5 {
+  font-weight: 700;
+  color: #003d82;
+}
+
+/* Report Card Styles */
+.report-card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.report-card:hover {
+  border-color: #2563eb !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+.report-info {
+  padding: 0.5rem 0;
+}
+
+.report-info small {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+}
+
+.report-info h6 {
+  font-weight: 700;
+  color: #003d82;
+}
+
+.report-card .badge {
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+}
+
+/* Report Table Styles */
+.report-id-cell {
+  font-weight: 700;
+}
+
+.report-id-cell .badge {
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+}
+
+.report-time {
+  color: #003d82;
+  font-weight: 600;
+}
+
+.report-date {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.report-details {
+  color: #333;
+  max-width: 200px;
+  display: inline-block;
+  word-wrap: break-word;
+}
+
+.action-btn {
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: white;
+}
+
+/* Announcement */
+.announcement-card{
+  border-left: 4px solid #2563eb;
+  border-radius: 10px;
+  padding: 1rem;
+}
+.announcement-date{
+  font-size: 12px;
+}
+.announcement-card:hover {
+  border-color: #2563eb !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1) !important;
+  transform: translateY(-2px);
 }
