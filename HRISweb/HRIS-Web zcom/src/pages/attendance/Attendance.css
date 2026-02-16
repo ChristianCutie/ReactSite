@@ -5,23 +5,25 @@
 
 /* Page Header */
 .attendance-header {
-   color: #003d82;
-  font-weight: 600;
   margin-bottom: 2rem;
-  padding: 0;
 }
 
 .attendance-title {
-  color: #003d82;
+  color: #003d82 !important;
   font-weight: 700;
   margin: 0;
   font-size: 2rem;
 }
 .attendance-date{
-  color: #003d82;
+  color: #1f2937;
   margin: 0 0 0.5rem 0;
 }
 
+.attendance-time {
+   color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
 /* Clock Card */
 .clock-card {
   border: none;

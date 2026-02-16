@@ -28,6 +28,7 @@ import {
   Download,
 } from "react-bootstrap-icons";
 
+
 const Payslip = ({ setIsAuth }) => {
   const { isAuth } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");

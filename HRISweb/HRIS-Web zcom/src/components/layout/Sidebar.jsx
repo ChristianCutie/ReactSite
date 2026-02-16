@@ -2,10 +2,10 @@ import React from 'react'
 import { Nav, Offcanvas } from 'react-bootstrap'
 import { Link, useLocation } from 'react-router-dom'
 import {
-  CalendarCheckFill,
-  CalendarXFill,
+  CalendarCheck,
+  CalendarX,
   CashCoin,
-  FileEarmarkTextFill,
+  FileEarmarkText,
   BoxArrowRight,
   Speedometer2
 } from 'react-bootstrap-icons'
@@ -16,10 +16,10 @@ const Sidebar = ({ show, handleClose }) => {
   const location = useLocation()
 
   const iconMap = {
-    'calendar-check': <CalendarCheckFill />,
-    'calendar-x': <CalendarXFill />,
+    'calendar-check': <CalendarCheck />,
+    'calendar-x': <CalendarX />,
     'cash-coin': <CashCoin />,
-    'file-earmark-text': <FileEarmarkTextFill />,
+    'file-earmark-text': <FileEarmarkText />,
     'speedometer2': <Speedometer2 />,
     'logout': <BoxArrowRight />
   }

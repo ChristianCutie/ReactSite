@@ -1,24 +1,22 @@
-# Disable MultiViews
+# Disable MultiViews (important for React Router)
 Options -MultiViews
 
-# Enable Rewrite for React Router
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # IMPORTANT: Set base to your app folder
     RewriteBase /snl-hr-app/
 
-    # If file/folder exists, serve it directly
+    # If the request is for an existing file or folder, serve it
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # Otherwise, redirect everything to index.html (React Router)
-    RewriteRule ^ index.html [L]
+    # Otherwise, send everything to React's index.html
+    RewriteRule . /snl-hr-app/index.html [L]
 </IfModule>
 
-# Enable headers for camera & microphone access
+# Camera & microphone permissions
 <IfModule mod_headers.c>
-    # Modern browsers
-    Header always set Feature-Policy "camera 'self'; microphone 'self'"
-    # Allow cross-origin requests for camera if needed
-    Header always set Access-Control-Allow-Origin "*"
+    Header always set Permissions-Policy "camera=(self), microphone=(self)"
 </IfModule>

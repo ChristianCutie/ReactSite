@@ -14,6 +14,7 @@ import AdminLayout from "../../components/layout/Adminlayout";
 import {
   PersonFillCheck,
   FileEarmarkRuledFill,
+  FileEarmarkRuled,
   ClipboardDataFill,
   CashCoin,
   JournalText,
@@ -376,7 +377,17 @@ const Dashboard = ({ setIsAuth }) => {
                     <h5>Announcement Board</h5>
                   </Card.Header>
                   <Card.Body>
-                    {announcements.map((a) => (
+                    {announcements.length === 0 ? (
+                       <div className="text-center py-5">
+                        <Megaphone
+                          size={48}
+                          className="mb-3 text-muted"
+                        />
+                        <p className="text-muted">No announcements available</p>
+                      </div>
+                    ):(
+                      <>
+                       {announcements.map((a) => (
                       <div
                         key={a.id}
                         className="mb-3 border announcement-card pb-2 shadow-sm"
@@ -398,7 +409,9 @@ const Dashboard = ({ setIsAuth }) => {
                           </p>
                         </div>
                       </div>
-                    ))}
+                    ))}</>
+                    )}
+                   
                   </Card.Body>
                 </Card>
               </Col>
@@ -430,7 +443,7 @@ const Dashboard = ({ setIsAuth }) => {
                               <td colSpan="6" className="text-center py-5">
                                 <JournalText
                                   size={48}
-                                  className="mb-3 text-muted d-block"
+                                  className="mb-3 text-muted"
                                 />
                                 <p className="text-muted">
                                   No reports available
@@ -506,7 +519,7 @@ const Dashboard = ({ setIsAuth }) => {
                   <Card.Body>
                     {recentPayslips.length === 0 ? (
                       <div className="text-center py-5">
-                        <FileEarmarkRuledFill
+                        <FileEarmarkRuled
                           size={48}
                           className="mb-3 text-muted"
                         />
