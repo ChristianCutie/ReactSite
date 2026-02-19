@@ -1,0 +1,34 @@
+.rich-text-editor .btn-toolbar {
+  gap: 0.25rem;
+}
+
+.rich-text-editor .btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border-radius: 0.2rem;
+}
+
+.ProseMirror {
+  min-height: 150px;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  background: white;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.ProseMirror:focus {
+  outline: none;
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

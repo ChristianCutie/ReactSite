@@ -12,6 +12,7 @@ import {
   Col,
   Table,
   Form,
+  InputGroup,
 } from "react-bootstrap";
 import AdminLayout from "../../components/layout/Adminlayout";
 import * as faceapi from "face-api.js";
@@ -19,6 +20,7 @@ import api from "../../config/axios.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { Clock, DoorOpen, Lightbulb } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
+import RichTextEditor from "./components/RichTextEditor.jsx";
 import "./Attendance.css";
 
 const Attendance = ({ setIsAuth }) => {
@@ -27,7 +29,7 @@ const Attendance = ({ setIsAuth }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const overlayRef = useRef(null);
-  const hasFetched = useRef(false); 
+  const hasFetched = useRef(false);
 
   const detectionInterval = useRef(null);
   const captureTimeout = useRef(null);
@@ -43,6 +45,13 @@ const Attendance = ({ setIsAuth }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Report modal state (only for Clock Out)
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [ccEmails, setCcEmails] = useState("");
+  const [reportBody, setReportBody] = useState("");
+  const [reportSubject, setReportSubject] = useState("");
+  const [submittingReport, setSubmittingReport] = useState(false); // not used anymore but kept
 
   // ---------- Attendance summary state ----------
   const [summary, setSummary] = useState({
@@ -157,8 +166,8 @@ const Attendance = ({ setIsAuth }) => {
   // Initial fetch
   useEffect(() => {
     if (isAuth) {
-       if (hasFetched.current) return;
-    hasFetched.current = true;
+      if (hasFetched.current) return;
+      hasFetched.current = true;
       fetchMyAttendance();
     }
   }, [isAuth]);
@@ -193,20 +202,25 @@ const Attendance = ({ setIsAuth }) => {
   const autoClockOut = async () => {
     autoClockOutTriggered.current = true;
     try {
-      await api.post('/attendance/clock-out');
-      showToast('Auto clocked out after 15 hours', 'info');
-      await fetchMyAttendance();               // refresh summary
+      await api.post("/attendance/clock-out");
+      showToast("Auto clocked out after 15 hours", "info");
+      await fetchMyAttendance(); // refresh summary
     } catch (error) {
       showToast(
-        'Auto clock-out failed: ' + (error.response?.data?.message || error.message),
-        'danger'
+        "Auto clock-out failed: " +
+          (error.response?.data?.message || error.message),
+        "danger",
       );
       // flag stays true to avoid infinite loops – user can retry manually
     }
   };
 
   useEffect(() => {
-    if (summary.isClockedIn && liveHoursToday >= 15 && !autoClockOutTriggered.current) {
+    if (
+      summary.isClockedIn &&
+      liveHoursToday >= 15 &&
+      !autoClockOutTriggered.current
+    ) {
       autoClockOut();
     }
   }, [liveHoursToday, summary.isClockedIn]);
@@ -360,12 +374,21 @@ const Attendance = ({ setIsAuth }) => {
       for (let i = 0; i < byteString.length; i++)
         ia[i] = byteString.charCodeAt(i);
       const file = new File([ab], "face.jpg", { type: mimeString });
+
       const formData = new FormData();
       formData.append("face_image", file);
+
+      // Append report data if this is a clock-out operation
+      if (summary.isClockedIn) {
+        formData.append("report_today", reportBody);
+        formData.append("cc_emails", ccEmails);
+        formData.append("subject", reportSubject);
+      }
 
       const endpoint = summary.isClockedIn
         ? "/attendance/clock-out"
         : "/attendance/clock-in";
+
       await api.post(endpoint, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -376,17 +399,21 @@ const Attendance = ({ setIsAuth }) => {
           : "Clocked In Successfully!",
       );
 
-      // If we just clocked in, reset the auto‑clock‑out flag for the new session
+      // Reset auto‑clock‑out flag for the new session
       if (!summary.isClockedIn) {
         autoClockOutTriggered.current = false;
       } else {
-        // If we just clocked out manually, also reset the flag (optional)
         autoClockOutTriggered.current = false;
       }
 
+      // Clear report data after successful clock-out
+      setCcEmails("");
+      setReportSubject("");
+      setReportBody("");
+
       stopCamera();
       setShowFaceModal(false);
-      setClockInTimestamp(null); // clear timestamp after clock-out
+      setClockInTimestamp(null);
       await fetchMyAttendance();
     } catch (error) {
       showToast(
@@ -397,6 +424,20 @@ const Attendance = ({ setIsAuth }) => {
       setIsProcessing(false);
       captureTimeout.current = null;
     }
+  };
+
+  // ========================
+  // REPORT HANDLER (only for Clock Out)
+  // ========================
+  const handleReportSubmit = async () => {
+    if (!reportBody || !reportBody.trim()) {
+      showToast("Please enter a report before continuing.", "warning");
+      return;
+    }
+    // No API call here – just close report modal and open camera
+    setShowReportModal(false);
+    setShowFaceModal(true);
+    setTimeout(startCamera, 500);
   };
 
   /* ========================
@@ -536,6 +577,12 @@ const Attendance = ({ setIsAuth }) => {
   const buttonVariant = summary.isClockedIn ? "danger" : "primary";
   const buttonText = summary.isClockedIn ? "Clock Out" : "Clock In";
 
+  // Disable Clock Out button after 15 hours
+  const isClockOutDisabled =
+    summary.isClockedIn &&
+    liveHoursToday >= 15 &&
+    !autoClockOutTriggered.current;
+
   // ---------- Initial loading screen ----------
   if (isInitialLoading) {
     return (
@@ -559,7 +606,7 @@ const Attendance = ({ setIsAuth }) => {
         </div>
 
         {/* ---------- Date/Time + Badge ---------- */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
+        <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
           <div>
             <h5 className="mb-0 attendance-date">{formattedDate}</h5>
             <p className="attendance-time text-muted">{formattedTime}</p>
@@ -569,7 +616,7 @@ const Attendance = ({ setIsAuth }) => {
           ) : (
             <Badge
               bg={badgeVariant}
-              className="px-4 py-2"
+              className="px-4 py-2 mt-2 mt-sm-0"
               style={{ fontSize: "1.1rem" }}
             >
               {badgeText}
@@ -579,7 +626,7 @@ const Attendance = ({ setIsAuth }) => {
 
         {/* ---------- MAIN ATTENDANCE CARD ---------- */}
         <Card className="shadow-sm border-0 rounded-4 mb-4">
-          <Card.Body className="p-4">
+          <Card.Body className="p-3 p-md-4">
             {loadingSummary ? (
               <div className="text-center py-4">
                 <Spinner animation="border" />
@@ -615,18 +662,34 @@ const Attendance = ({ setIsAuth }) => {
                     <small className="text-uppercase text-muted">STATUS</small>
                     <h3 className="fw-bold">{statusText}</h3>
                   </div>
-                  <Button
-                    variant={buttonVariant}
-                    size="md"
-                    className=" rounded-3"
-                    onClick={() => {
-                      setShowFaceModal(true);
-                      setTimeout(startCamera, 500);
-                    }}
-                    disabled={loadingSummary}
-                  >
-                    {buttonText}
-                  </Button>
+                  {/* Button wrapper for full width on mobile */}
+                  <div className="d-grid gap-2 d-md-block">
+                    <Button
+                      variant={buttonVariant}
+                      size="md"
+                      className="rounded-3"
+                      onClick={() => {
+                        if (summary.isClockedIn) {
+                          // Clock Out: show report modal
+                          setShowReportModal(true);
+                          setCcEmails(""); // clear previous CC
+                          setReportBody(""); // clear previous body
+                        } else {
+                          // Clock In: open camera directly
+                          setShowFaceModal(true);
+                          setTimeout(startCamera, 500);
+                        }
+                      }}
+                      disabled={loadingSummary || isClockOutDisabled}
+                      title={
+                        isClockOutDisabled
+                          ? "Maximum work duration of 15 hours exceeded"
+                          : ""
+                      }
+                    >
+                      {buttonText}
+                    </Button>
+                  </div>
                 </Col>
               </Row>
             )}
@@ -635,7 +698,7 @@ const Attendance = ({ setIsAuth }) => {
 
         {/* ---------- SUMMARY CARDS ---------- */}
         <Row className="g-4 mb-5">
-          <Col sm={6} md={3}>
+          <Col xs={12} sm={6} md={3}>
             <Card className="text-center border-0 shadow-sm rounded-4">
               <Card.Body>
                 <h6 className="text-muted">THIS WEEK</h6>
@@ -649,7 +712,7 @@ const Attendance = ({ setIsAuth }) => {
               </Card.Body>
             </Card>
           </Col>
-          <Col sm={6} md={3}>
+          <Col xs={12} sm={6} md={3}>
             <Card className="text-center border-0 shadow-sm rounded-4">
               <Card.Body>
                 <h6 className="text-muted">THIS MONTH</h6>
@@ -663,7 +726,7 @@ const Attendance = ({ setIsAuth }) => {
               </Card.Body>
             </Card>
           </Col>
-          <Col sm={6} md={3}>
+          <Col xs={12} sm={6} md={3}>
             <Card className="text-center border-0 shadow-sm rounded-4">
               <Card.Body>
                 <h6 className="text-muted">ATTENDANCE</h6>
@@ -677,7 +740,7 @@ const Attendance = ({ setIsAuth }) => {
               </Card.Body>
             </Card>
           </Col>
-          <Col sm={6} md={3}>
+          <Col xs={12} sm={6} md={3}>
             <Card className="text-center border-0 shadow-sm rounded-4">
               <Card.Body>
                 <h6 className="text-muted">ON TIME</h6>
@@ -762,6 +825,96 @@ const Attendance = ({ setIsAuth }) => {
           </Card>
         )}
       </Container>
+
+      {/* ---------- REPORT MODAL (only for Clock Out) ---------- */}
+      <Modal
+        show={showReportModal}
+        onHide={() => {
+          setShowReportModal(false);
+          setCcEmails("");
+          setReportSubject("");
+          setReportBody("");
+        }}
+        centered
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Daily Report (Clock Out)</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            {/* TO field with InputGroup */}
+            <InputGroup className="mb-3">
+              <InputGroup.Text id="to-addon">TO</InputGroup.Text>
+              <Form.Control
+                type="text"
+                placeholder="hello@snlvirtualpartner.com"
+                readOnly
+                disabled
+                aria-label="TO"
+                aria-describedby="to-addon"
+              />
+            </InputGroup>
+
+            {/* CC field with InputGroup */}
+            <InputGroup className="mb-3">
+              <InputGroup.Text id="cc-addon">CC</InputGroup.Text>
+              <Form.Control
+                type="email"
+                multiple
+                value={ccEmails}
+                onChange={(e) => setCcEmails(e.target.value)}
+                placeholder="Enter email addresses separated by commas"
+                aria-label="CC"
+                aria-describedby="cc-addon"
+                marginBottom="0"
+              />
+            </InputGroup>
+            <Form.Text className="text-muted mb-3 d-block">
+              Separate multiple emails with commas.
+            </Form.Text>
+
+            {/* Subject field with InputGroup */}
+            <InputGroup className="mb-3">
+              <InputGroup.Text id="subject-addon">Subject</InputGroup.Text>
+              <Form.Control
+                type="text"
+                value={reportSubject}
+                onChange={(e) => setReportSubject(e.target.value)}
+                placeholder="Enter email subject"
+                aria-label="Subject"
+                aria-describedby="subject-addon"
+              />
+            </InputGroup>
+
+            {/* Content/Body - rich text editor */}
+            <Form.Group className="mb-3">
+              <Form.Label>Content / Body</Form.Label>
+              <RichTextEditor
+                value={reportBody}
+                onChange={setReportBody}
+                placeholder="Describe your work, accomplishments, or any issues..."
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowReportModal(false);
+              setCcEmails("");
+              setReportSubject("");
+              setReportBody("");
+            }}
+          >
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleReportSubmit}>
+            Submit & Continue
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* ---------- DTR ADJUSTMENT MODAL ---------- */}
       <Modal
@@ -887,6 +1040,9 @@ const Attendance = ({ setIsAuth }) => {
         onHide={() => {
           setShowFaceModal(false);
           stopCamera();
+          setCcEmails("");
+          setReportSubject("");
+          setReportBody("");
         }}
         centered
         size="lg"
