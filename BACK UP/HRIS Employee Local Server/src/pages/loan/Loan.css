@@ -1,0 +1,270 @@
+.loan-container {
+  padding: 0;
+}
+
+.loan-header {
+  margin-bottom: 2rem;
+  padding: 0;
+}
+
+.loan-title {
+  color: #003d82;
+  font-weight: 700;
+  margin: 0;
+  font-size: 2rem;
+}
+
+.loan-section {
+  margin-bottom: 2rem;
+}
+
+.section-header-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  color: #1f2937;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.section-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.btn-apply-loan-inline {
+  background-color: #2563eb;
+  border: none;
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  transition: background-color 0.3s ease;
+}
+
+.btn-apply-loan-inline:hover {
+  background-color: #1d4ed8;
+  color: white;
+}
+
+.empty-state-card {
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+}
+
+.empty-state-body {
+  background-color: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  border-radius: 0.5rem;
+}
+
+.empty-state-icon {
+  color: #d1d5db;
+  margin-bottom: 1rem;
+  font-size: 3rem;
+}
+
+.empty-state-title {
+  color: #1f2937;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  max-width: 400px;
+}
+
+.btn-apply-first {
+  background-color: #2563eb;
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.btn-apply-first:hover {
+  background-color: #1d4ed8;
+  color: white;
+}
+
+.loans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.loan-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
+  transition: box-shadow 0.3s ease;
+}
+
+.loan-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.loan-label {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.loan-value {
+  color: #1f2937;
+  margin: 0;
+  font-weight: 600;
+}
+
+.badge-approved {
+  background-color: #10b981;
+  color: white;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.badge-pending {
+  background-color: #f59e0b;
+  color: white;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.badge-rejected {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+  .loan-header {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+  }
+
+  .loan-section {
+    padding: 0 1.5rem;
+  }
+
+  .section-header-inline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .btn-apply-loan-inline {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .loan-header {
+    padding: 1rem 1rem 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .loan-section {
+    padding: 0 1rem;
+  }
+
+  .section-header-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .btn-apply-loan-inline {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .empty-state-body {
+    padding: 2rem 1.5rem;
+  }
+
+  .empty-state-icon {
+    font-size: 2.5rem;
+  }
+
+  .empty-state-title {
+    font-size: 1.1rem;
+  }
+
+  .empty-state-text {
+    font-size: 0.9rem;
+  }
+
+  .btn-apply-first {
+    font-size: 0.85rem;
+    padding: 0.65rem 1rem;
+  }
+
+  .loan-card {
+    margin-bottom: 0.75rem;
+  }
+
+  .loan-label {
+    font-size: 0.75rem;
+  }
+
+  .loan-value {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .loan-section {
+    padding: 0 0.75rem;
+  }
+
+  .section-header-inline {
+    gap: 0.75rem;
+  }
+
+  .loan-header {
+    padding: 1rem 0.75rem 0.75rem 0.75rem;
+  }
+
+  .loan-title {
+    font-size: 1.5rem;
+  }
+}

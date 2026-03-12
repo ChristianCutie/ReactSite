@@ -1,0 +1,25 @@
+﻿/* Lesson.css - two column layout styles */
+
+.lesson-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+
+.resource-list {
+  position: sticky;
+  top: 90px;
+}
+
+@media (max-width: 767px) {
+  .resource-list {
+    position: static;
+    top: auto;
+  }
+}
+
+/* small spacing tweaks */
+.lesson-download-btn {
+  min-width: 110px;
+}

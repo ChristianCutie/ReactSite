@@ -1,0 +1,281 @@
+/* ===============================
+   SHADCN STYLE DASHBOARD THEME
+================================= */
+
+/* Root */
+.dashboard-container {
+  padding: 2rem;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Header */
+.dashboard-header-modern {
+  margin-bottom: 1rem;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+/* ===============================
+   STAT CARDS
+================================= */
+
+.stat-card-modern {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  height: 100%;
+}
+
+.stat-card-modern:hover {
+  background: #f9fafb;
+  border-color: #cbd5e1;
+}
+
+.stat-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-info p {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.stat-info h5 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: #334155;
+}
+
+/* ===============================
+   MAIN CARDS
+================================= */
+
+.dashboard-card-modern {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.dashboard-card-modern:hover {
+  border-color: #cbd5e1;
+}
+
+.card-header-custom {
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 1.25rem 1.5rem;
+}
+
+.card-header-custom h5 {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* ===============================
+   ATTENDANCE SECTION
+================================= */
+
+.attendance-chart-wrapper {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+
+.attendance-stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.attendance-stat-card:hover {
+  background: #f9fafb;
+}
+
+.stat-header h6 {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.stat-content h3 {
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: #0f172a;
+}
+
+.percentage-badge {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.percentage-badge.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.percentage-badge.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ===============================
+   TABLE
+================================= */
+
+.dashboard-table thead th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: none;
+}
+
+.dashboard-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dashboard-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.dashboard-table td {
+  font-size: 0.875rem;
+  color: #334155;
+}
+
+/* ===============================
+   ANNOUNCEMENTS
+================================= */
+
+.announcement-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.announcement-card:hover {
+  background: #f9fafb;
+  border-color: #cbd5e1;
+}
+
+.announcement-title {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.announcement-date {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* ===============================
+   PAYSLIP CARDS
+================================= */
+
+.payslip-card-modern {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.payslip-card-modern:hover {
+  background: #f9fafb;
+  border-color: #cbd5e1;
+}
+
+.payslip-info small {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.payslip-info h5 {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* ===============================
+   MODAL & OFFCANVAS
+================================= */
+
+.modal-content {
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+}
+
+.offcanvas {
+  border-left: 1px solid #e2e8f0;
+}
+
+/* ===============================
+   BUTTON STYLE (shadcn feel)
+================================= */
+
+.btn-outline-primary {
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.btn-outline-primary:hover {
+  background: #0f172a;
+  border-color: #0f172a;
+}
+
+/* ===============================
+   RESPONSIVE
+================================= */
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .stat-card-modern {
+    margin-bottom: 1rem;
+  }
+}

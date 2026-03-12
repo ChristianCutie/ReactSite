@@ -1,0 +1,293 @@
+.attendance-calendar-card {
+  border-radius: 16px;
+  border: 1px solid #e0e0e0;
+}
+
+.card-header-custom {
+  background: #f8f9fa;
+  padding: 1rem;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.month-year {
+  font-weight: 600;
+  min-width: 140px;
+  text-align: center;
+}
+
+.btn-icon {
+  background: #f1f1f1;
+  border: 1px solid #ddd;
+  color: #333;
+}
+
+.summary-stats {
+  margin-bottom: 1.5rem !important;
+}
+
+.stat-box {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-box.present, .stat-box.late, .stat-box.leave, .stat-box.absent  {
+  background-color: #fff;
+}
+.stat-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+
+.calendar-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  min-width: 420px;
+}
+
+.weekday-header {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  transition: 0.2s;
+}
+
+.calendar-day:hover {
+  border-color: #0d6efd;
+}
+
+.day-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.day-number {
+  font-weight: 600;
+}
+
+.status-indicator {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Present */
+
+.calendar-day.present {
+  /* background: #d4edda; */
+  border-color: #28a745;
+}
+
+.calendar-day.present .status-indicator {
+  background: #28a745;
+  color: #fff;
+}
+
+/* Absent */
+
+.calendar-day.absent {
+  /* background: #f8d7da; */
+  border-color: #dc3545;
+  color: #212529;
+}
+
+.calendar-day.absent .status-indicator {
+  background: #dc3545;
+  color: #fff;
+}
+
+/* Late */
+
+.calendar-day.late {
+  background: #fff3cd;
+  border-color: #ffc107;
+}
+
+.calendar-day.late .status-indicator {
+  background: #ffc107;
+  color: #000;
+}
+
+/* Leave */
+
+.calendar-day.leave {
+  background: #d1ecf1;
+  border-color: #17a2b8;
+}
+
+.calendar-day.leave .status-indicator {
+  background: #17a2b8;
+  color: #fff;
+}
+.calendar-day.missed {
+  background: #d1ecf1;
+  border-color: #17a2b8;
+}
+
+.calendar-day.missed .status-indicator {
+  background: #17a2b8;
+  color: #fff;
+}
+
+/* Weekend */
+
+.calendar-day.weekend {
+  background: #e7e7e7;
+  border-color: #999;
+}
+
+.calendar-day.weekend .status-indicator {
+  background: #999;
+  color: #fff;
+}
+
+/* No Data */
+
+.calendar-day.no-data {
+  background: #f8f9fa;
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.legend-color.present {
+  background: #d4edda;
+  border: 2px solid #28a745;
+}
+
+.legend-color.absent {
+  background: #f8d7da;
+  border: 2px solid #dc3545;
+}
+
+.legend-color.late {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+}
+
+.legend-color.missed {
+  background: #d1ecf1;
+  border: 2px solid #17a2b8;
+}
+
+.legend-color.weekend {
+  background: #e7e7e7;
+  border: 2px solid #999;
+}
+
+.legend-color.no-data {
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+  .calendar-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .month-year {
+    min-width: auto;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .calendar-day {
+    aspect-ratio: auto;
+    min-height: 36px;
+  }
+
+  .day-number {
+    font-size: 0.75rem;
+  }
+
+  .status-indicator {
+    width: 14px;
+    height: 14px;
+    font-size: 10px;
+  }
+
+  .weekday-header {
+    font-size: 0.7rem;
+  }
+}
+
+/* Today absent (optional: same as red or slightly different) */
+.calendar-day.absent-today {
+  background-color: #ff4d4f;
+  color: white;
+  font-weight: bold;
+  border: 2px solid #fff;
+}
+
+/* Future absent */
+.calendar-day.absent-future {
+  background-color: #fff; /* gray */
+  color: #555;
+}
