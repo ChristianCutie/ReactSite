@@ -8,6 +8,7 @@ import Loan from "../pages/loan/Loan.jsx";
 import Payslip from "../pages/payslip/Payslip.jsx";
 import Profile from "../pages/profile/Profile.jsx";
 import Lesson from "../pages/lessons/Lesson.jsx";
+import Modules from "../pages/lessons/components/Modules.jsx";
 import { useEffect } from "react";
 
 const AppRoutes = ({ isAuth, setIsAuth }) => {
@@ -89,16 +90,26 @@ const AppRoutes = ({ isAuth, setIsAuth }) => {
           )
         }
       />
-      <Route
-        path="/lessons"
-        element={
-          isAuth ? (
-            <Lesson setIsAuth={setIsAuth} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/lessons"
+          element={
+            isAuth ? (
+              <Lesson setIsAuth={setIsAuth} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/lessons/module"
+          element={
+            isAuth ? (
+              <Modules setIsAuth={setIsAuth} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+          />
         )
 
       {/* Fallback */}

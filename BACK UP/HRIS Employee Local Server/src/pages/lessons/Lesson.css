@@ -6,7 +6,6 @@
   margin-top: 1rem;
 }
 
-
 .resource-list {
   position: sticky;
   top: 90px;
@@ -22,4 +21,13 @@
 /* small spacing tweaks */
 .lesson-download-btn {
   min-width: 110px;
+}
+
+.module-card {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+  background: #ffffff;
 }
