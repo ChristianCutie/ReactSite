@@ -78,13 +78,11 @@ const Attendance = ({ setIsAuth }) => {
   const [activeTab, setActiveTab] = useState("overview");
 
   //Export Tab
-  
-    const [month, setMonth] = useState("");
-    const [year, setYear] = useState("");
-    const [date, setDate] = useState("");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
-    const [loadingExport, setLoadingExport] = useState(false);
+
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [loadingExport, setLoadingExport] = useState(false);
+  const [status, setStatus] = useState("");
 
   const navigate = useNavigate();
 
@@ -268,16 +266,14 @@ const Attendance = ({ setIsAuth }) => {
 
   // ----------------- EXOPORT TO EXCEL -----------------
 
-   const handleExport = async () => {
+  const handleExport = async () => {
     try {
       setLoadingExport(true);
 
       const params = {
-        month: month || undefined,
-        year: year || undefined,
-        date: date || undefined,
-        start_date: startDate || undefined,
-        end_date: endDate || undefined,
+        month,
+        year,
+        status,
       };
 
       const response = await api.get("/my-attendance/export", {
@@ -285,18 +281,13 @@ const Attendance = ({ setIsAuth }) => {
         responseType: "blob",
       });
 
-      // Create file download
       const blob = new Blob([response.data], { type: "text/csv" });
-       showToast("Export successfully downloaded", "success");
       const url = window.URL.createObjectURL(blob);
 
       const link = document.createElement("a");
       link.href = url;
 
-      const fileName =
-        "my_attendance_report_" +
-        new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") +
-        ".csv";
+      const fileName = `my_attendance_${year}_${month}.csv`;
 
       link.setAttribute("download", fileName);
       document.body.appendChild(link);
@@ -304,9 +295,14 @@ const Attendance = ({ setIsAuth }) => {
       link.remove();
 
       window.URL.revokeObjectURL(url);
+
+      showToast("Export successfully downloaded", "success");
     } catch (error) {
       console.error("Export failed:", error);
-      showToast(error.response?.data?.message || "Failed to export attendance.", "danger");
+      showToast(
+        error.response?.data?.message || "Failed to export attendance.",
+        "danger",
+      );
     } finally {
       setLoadingExport(false);
     }
@@ -501,7 +497,7 @@ const Attendance = ({ setIsAuth }) => {
     hour12: true,
   });
 
-    const tabs = [
+  const tabs = [
     { key: "overview", label: "Overview", icon: <ClockHistory /> },
     { key: "presentAbsent", label: "Present & Absent", icon: <PersonBadge /> },
     { key: "export", label: "Export", icon: <Download /> },
@@ -569,15 +565,10 @@ const Attendance = ({ setIsAuth }) => {
     </Popover>
   );
 
-
-
- const clearFilters = () => {
-  setMonth("");
-  setYear("");
-  setDate("");
-  setStartDate("");
-  setEndDate("");
-};
+  const clearFilters = () => {
+    setMonth("");
+    setYear("");
+  };
 
   return (
     <AdminLayout setIsAuth={setIsAuth}>
@@ -647,13 +638,18 @@ const Attendance = ({ setIsAuth }) => {
         )}
 
         {/* EXPORT TAB CONTENT */}
-        {activeTab === "export" && <ExportTab
-          handleExport={handleExport}
-          loadingExport={loadingExport}
-          clearFilters={clearFilters}
-          setEndDate={setEndDate}
-          setStartDate={setStartDate}
-           />}
+        {activeTab === "export" && (
+          <ExportTab
+            handleExport={handleExport}
+            loadingExport={loadingExport}
+            clearFilters={clearFilters}
+            month={month}
+            year={year}
+            setMonth={setMonth}
+            setYear={setYear}
+            setStatus={setStatus}
+          />
+        )}
 
         {/* REPORT MODAL (Clock Out) */}
         <ReportClockOutModal
