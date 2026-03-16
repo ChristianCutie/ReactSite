@@ -9,9 +9,11 @@ import {
   Form,
   Alert,
 } from "react-bootstrap";
+import { JournalX, ExclamationCircle } from "react-bootstrap-icons";
 import AdminLayout from "../../../components/layout/Adminlayout";
 import axios from "../../../config/axios";
 import { useAuth } from "../../../context/AuthContext";
+import "./../../../assets/style/global.css";
 
 const Modules = ({ lesson, goBack, setIsAuth }) => {
   const [currentModule, setCurrentModule] = useState(0);
@@ -24,7 +26,11 @@ const Modules = ({ lesson, goBack, setIsAuth }) => {
   const module = lesson?.modules?.[currentModule];
   const key = `${currentModule}`;
   const questions = module?.questions || [];
-  const allAnswered = questions.length > 0 && questions.every((q, idx) => typeof selectedAnswers[key]?.[idx] !== "undefined");
+  const allAnswered =
+    questions.length > 0 &&
+    questions.every(
+      (q, idx) => typeof selectedAnswers[key]?.[idx] !== "undefined",
+    );
 
   const handleAnswerSelect = (qIndex, optionIndex) => {
     setSelectedAnswers((prev) => ({
@@ -107,31 +113,39 @@ const Modules = ({ lesson, goBack, setIsAuth }) => {
     ? (Object.keys(passedModules).length / lesson.modules.length) * 100
     : 0;
 
-  const allModulesPassed = Array.isArray(lesson?.modules) && lesson.modules.length > 0
-    && lesson.modules.every((m, i) => passedModules[i]);
+  const allModulesPassed =
+    Array.isArray(lesson?.modules) &&
+    lesson.modules.length > 0 &&
+    lesson.modules.every((m, i) => passedModules[i]);
 
   const downloadCertificate = () => {
-    const userName = (user && (user.name || user.full_name || `${user.first_name || ''} ${user.last_name || ''}`)) || 'Employee';
+    const userName =
+      (user &&
+        (user.name ||
+          user.full_name ||
+          `${user.first_name || ""} ${user.last_name || ""}`)) ||
+      "Employee";
     const date = new Date().toLocaleDateString();
     const lines = [];
     lines.push(`${lesson?.lesson_title} - Completion Certificate`);
     lines.push(`Name: ${userName}`);
     lines.push(`Date: ${date}`);
-    lines.push('');
-    lines.push('Module results:');
+    lines.push("");
+    lines.push("Module results:");
     (lesson.modules || []).forEach((m, i) => {
-      const passed = passedModules[i] ? 'Passed' : 'Not passed';
+      const passed = passedModules[i] ? "Passed" : "Not passed";
       const scoreCount = scores[`${i}`];
       const total = (m.questions || []).length || 0;
-      const scoreText = typeof scoreCount !== 'undefined' ? `${scoreCount}/${total}` : 'N/A';
+      const scoreText =
+        typeof scoreCount !== "undefined" ? `${scoreCount}/${total}` : "N/A";
       lines.push(`- ${m.title}: ${passed} (${scoreText})`);
     });
 
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `${lesson?.lesson_title || 'lesson'}-certificate.txt`;
+    a.download = `${lesson?.lesson_title || "lesson"}-certificate.txt`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -167,9 +181,25 @@ const Modules = ({ lesson, goBack, setIsAuth }) => {
   if (!Array.isArray(lesson.modules) || lesson.modules.length === 0) {
     return (
       <AdminLayout setIsAuth={setIsAuth}>
-        <div className="profile-loading">
-          <p>No modules available for this lesson.</p>
-        </div>
+        <Container fluid className="maintenance-container">
+          <div className="maintenance-content">
+            <JournalX size={64} className="module-icon" />
+            <h1 className="maintenance-title">
+              No modules available for this lesson.
+            </h1>
+            <p className="maintenance-message">
+              Sorry, but there are currently no modules available for this
+              lesson. Please check back later or contact your administrator for
+              more information.
+            </p>
+            <Button
+              className="rounded-3 px-3 shadow-sm btn btn-secondary btn-sm"
+              onClick={goBack}
+            >
+              ← Select Lesson
+            </Button>
+          </div>
+        </Container>
       </AdminLayout>
     );
   }
@@ -177,12 +207,15 @@ const Modules = ({ lesson, goBack, setIsAuth }) => {
   return (
     <AdminLayout setIsAuth={setIsAuth}>
       <Container fluid className="mt-4 lesson-container">
-            <div className="d-flex align-items-center justify-content-between mb-4">
-               <h3>{lesson?.lesson_title} Training</h3>
-              <Button className="rounded-3 px-3 shadow-sm btn btn-secondary btn-sm" onClick={goBack}>
-                ← Select Lesson
-              </Button>
-            </div>
+        <div className="d-flex align-items-center justify-content-between mb-4">
+          <h3>{lesson?.lesson_title} Training</h3>
+          <Button
+            className="rounded-3 px-3 shadow-sm btn btn-secondary btn-sm"
+            onClick={goBack}
+          >
+            ← Select Lesson
+          </Button>
+        </div>
         <Row className="mb-4">
           <Col>
             <ProgressBar now={progress} />
@@ -221,14 +254,20 @@ const Modules = ({ lesson, goBack, setIsAuth }) => {
                               type="radio"
                               label={opt.choice_text}
                               name={`q${qIndex}`}
-                              checked={selectedAnswers[key]?.[qIndex] === oIndex}
-                              onChange={() => handleAnswerSelect(qIndex, oIndex)}
+                              checked={
+                                selectedAnswers[key]?.[qIndex] === oIndex
+                              }
+                              onChange={() =>
+                                handleAnswerSelect(qIndex, oIndex)
+                              }
                               disabled={loading}
                               required
                             />
                           ))
                         ) : (
-                          <div className="text-muted">No choices available for this question.</div>
+                          <div className="text-muted">
+                            No choices available for this question.
+                          </div>
                         )}
                       </Form.Group>
                     ))}
@@ -253,7 +292,10 @@ const Modules = ({ lesson, goBack, setIsAuth }) => {
                       </Button>
 
                       {!allAnswered && !loading && (
-                        <div className="text-danger small mt-2">Please answer all questions before submitting.</div>
+                        <div className="text-muted small mt-2 fst-italic">
+                          <ExclamationCircle className="me-2 mb-1 "/>
+                          Please answer all questions before submitting.
+                        </div>
                       )}
 
                       {scores[key] !== undefined && (
@@ -287,9 +329,7 @@ const Modules = ({ lesson, goBack, setIsAuth }) => {
           <Col md={4}>
             <Card>
               <Card.Body>
-                <div className="d-flex align-items-center justify-content-between">
-                  
-                </div>
+                <div className="d-flex align-items-center justify-content-between"></div>
                 <Card.Title>{lesson?.lesson_title} Modules</Card.Title>
                 {(lesson?.modules || []).map((m, i) => {
                   const locked = i > 0 && !passedModules[i - 1];

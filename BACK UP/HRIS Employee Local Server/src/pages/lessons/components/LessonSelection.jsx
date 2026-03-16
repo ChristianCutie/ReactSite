@@ -44,7 +44,7 @@ const LessonSelection = ({ lessons = [], setSelectedLesson, setIsAuth }) => {
   };
   return (
     <AdminLayout setIsAuth={setIsAuth}>
-      <Container className="mt-4">
+      <Container fluid className="mt-4">
         <Row className="mb-3">
           <Col>
             <h3>Available Lessons</h3>

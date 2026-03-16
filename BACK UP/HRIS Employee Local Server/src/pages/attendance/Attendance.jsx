@@ -1,37 +1,22 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Container,
-  Card,
   Button,
-  Modal,
   Toast,
   ToastContainer,
-  Badge,
-  Spinner,
-  Row,
-  Col,
-  Table,
-  Form,
-  InputGroup,
-  Dropdown,
-  OverlayTrigger,
   Popover,
 } from "react-bootstrap";
 import AdminLayout from "../../components/layout/Adminlayout";
 import api from "../../config/axios.js";
 import { useAuth } from "../../context/AuthContext.jsx";
-import {
-  Clock,
-  DoorOpen,
-  Lightbulb,
-  ThreeDots,
-  CalendarDate,
-  ClockHistory,
-  PersonBadge,
-  QuestionCircle,
-} from "react-bootstrap-icons";
-import { useNavigate, Link } from "react-router-dom";
-import RichTextEditor from "./components/RichTextEditor.jsx";
+import { ClockHistory, PersonBadge, Download } from "react-bootstrap-icons";
+import { useNavigate } from "react-router-dom";
+import OverviewTab from "./tabs/OverviewTab.jsx";
+import PresentAbsentTab from "./tabs/PresentAbsentTab.jsx";
+import DRTAdjustmentModal from "./components/modals/DRTAdjustmentModal.jsx";
+import ReportClockOutModal from "./components/modals/ReportClockOutModal.jsx";
+import ForgotClockInModal from "./components/modals/ForgotClockInModal.jsx";
+import ExportTab from "./tabs/ExportTab.jsx";
 import "./Attendance.css";
 import "../../assets/style/global.css";
 
@@ -91,6 +76,15 @@ const Attendance = ({ setIsAuth }) => {
   const [absentDates, setAbsentDates] = useState([]);
   const [loadingPresentAbsent, setLoadingPresentAbsent] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+
+  //Export Tab
+  
+    const [month, setMonth] = useState("");
+    const [year, setYear] = useState("");
+    const [date, setDate] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [loadingExport, setLoadingExport] = useState(false);
 
   const navigate = useNavigate();
 
@@ -272,6 +266,52 @@ const Attendance = ({ setIsAuth }) => {
     }
   };
 
+  // ----------------- EXOPORT TO EXCEL -----------------
+
+   const handleExport = async () => {
+    try {
+      setLoadingExport(true);
+
+      const params = {
+        month: month || undefined,
+        year: year || undefined,
+        date: date || undefined,
+        start_date: startDate || undefined,
+        end_date: endDate || undefined,
+      };
+
+      const response = await api.get("/my-attendance/export", {
+        params,
+        responseType: "blob",
+      });
+
+      // Create file download
+      const blob = new Blob([response.data], { type: "text/csv" });
+       showToast("Export successfully downloaded", "success");
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+
+      const fileName =
+        "my_attendance_report_" +
+        new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") +
+        ".csv";
+
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed:", error);
+      showToast(error.response?.data?.message || "Failed to export attendance.", "danger");
+    } finally {
+      setLoadingExport(false);
+    }
+  };
+
   // ----------------- REPORT MODAL SUBMIT -----------------
   const handleReportSubmit = async () => {
     if (!reportBody || !reportBody.trim()) {
@@ -409,7 +449,7 @@ const Attendance = ({ setIsAuth }) => {
       console.log("Forgot Clock In Payload:", payload);
       const res = await api.post("/request/clock/date", payload);
       setLoading(false);
-    showToast("Clock-in adjustment request submitted!", "success");
+      showToast("Clock-in adjustment request submitted!", "success");
       setShowForgotModal(false);
     } catch (error) {
       console.error(error);
@@ -460,6 +500,13 @@ const Attendance = ({ setIsAuth }) => {
     minute: "2-digit",
     hour12: true,
   });
+
+    const tabs = [
+    { key: "overview", label: "Overview", icon: <ClockHistory /> },
+    { key: "presentAbsent", label: "Present & Absent", icon: <PersonBadge /> },
+    { key: "export", label: "Export", icon: <Download /> },
+  ];
+
   const badgeText = summary.isClockedIn ? "Checked In" : "Not Checked In";
   const badgeVariant = summary.isClockedIn ? "success" : "secondary";
   const statusText = summary.isClockedIn ? "On Duty" : "Off Duty";
@@ -522,6 +569,16 @@ const Attendance = ({ setIsAuth }) => {
     </Popover>
   );
 
+
+
+ const clearFilters = () => {
+  setMonth("");
+  setYear("");
+  setDate("");
+  setStartDate("");
+  setEndDate("");
+};
+
   return (
     <AdminLayout setIsAuth={setIsAuth}>
       <Container fluid className="attendance-container">
@@ -530,974 +587,108 @@ const Attendance = ({ setIsAuth }) => {
           <h2 className="attendance-title fw-bold">Attendance</h2>
         </div>
         <div className="align-items-center justify-content-start d-flex flex-wrap gap-3 mb-4">
-          <Button
-            size="sm"
-            className="px-3"
-            variant={
-              activeTab === "overview" ? "secondary" : "outline-secondary"
-            }
-            onClick={() => setActiveTab("overview")}
-          >
-            Overview
-          </Button>
-          <Button
-            size="sm"
-            className="px-3"
-            variant={
-              activeTab === "presentAbsent" ? "secondary" : "outline-secondary"
-            }
-            onClick={() => setActiveTab("presentAbsent")}
-          >
-            Present & Absent
-          </Button>
+          {tabs.map((tab) => (
+            <Button
+              key={tab.key}
+              size="sm"
+              className="px-3"
+              variant={
+                activeTab === tab.key ? "secondary" : "outline-secondary"
+              }
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.icon}
+              <span className="ms-2">{tab.label}</span>
+            </Button>
+          ))}
         </div>
 
         {/* OVERVIEW TAB CONTENT */}
         {activeTab === "overview" && (
-          <>
-            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
-              <div>
-                <h5 className="mb-0 attendance-date">{formattedDate}</h5>
-                <p className="attendance-time text-muted">{formattedTime}</p>
-              </div>
-              {loadingSummary ? (
-                <Spinner animation="border" size="sm" />
-              ) : (
-                <Badge
-                  bg={badgeVariant}
-                  className="px-3 py-2 mt-2 mt-sm-0"
-                  style={{ fontSize: "1.1rem" }}
-                >
-                  {badgeText}
-                </Badge>
-              )}
-            </div>
-
-            <Card className="shadow-sm border-0 rounded-4 mb-4">
-              <Card.Body className="p-3 p-md-4">
-                {loadingSummary ? (
-                  <div className="text-center py-4">
-                    <Spinner animation="border" />
-                  </div>
-                ) : (
-                  <Row className="align-items-center">
-                    <Col md={6}>
-                      <div className="mb-3">
-                        <small className="text-uppercase text-muted">
-                          CLOCK IN TIME
-                        </small>
-                        <h3 className="fw-bold">
-                          {summary.clockInTime || "---"}
-                        </h3>
-                      </div>
-                      <div>
-                        <small className="text-uppercase text-muted">
-                          HOURS TODAY
-                        </small>
-                        <h3 className="fw-bold">
-                          {liveHoursToday.toFixed(2)} hrs
-                        </h3>
-                      </div>
-                    </Col>
-                    <Col md={1} className="d-none d-md-block text-center">
-                      <div
-                        style={{
-                          width: 2,
-                          height: 80,
-                          background: "#dee2e6",
-                          margin: "auto",
-                        }}
-                      />
-                    </Col>
-                    <Col md={5} className="text-md-end mt-4 mt-md-0">
-                      <div className="mb-3">
-                        <small className="text-uppercase text-muted">
-                          STATUS
-                        </small>
-                        <h3 className="fw-bold">{statusText}</h3>
-                      </div>
-                      <div className="d-flex gap-2 justify-content-md-end">
-                        <Button
-                          variant="success"
-                          size="sm"
-                          className=" px-3"
-                          onClick={handleClockIn}
-                          disabled={
-                            summary.isClockedIn ||
-                            loadingSummary ||
-                            loadingIn ||
-                            loadingOut
-                          }
-                        >
-                          {loadingIn ? (
-                            <>
-                              <span
-                                className="spinner-border spinner-border-sm me-2"
-                                role="status"
-                                aria-hidden="true"
-                              ></span>
-                              Clocking In...
-                            </>
-                          ) : (
-                            <>
-                              <Clock className="me-2" size={18} />
-                              Clock In
-                            </>
-                          )}
-                        </Button>
-
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          className=" px-3"
-                          onClick={() => {
-                            setShowReportModal(true);
-                            setCcEmails("");
-                            setReportBody("");
-                          }}
-                          disabled={
-                            !summary.isClockedIn ||
-                            loadingSummary ||
-                            isClockOutDisabled ||
-                            loadingIn ||
-                            loadingOut
-                          }
-                          title={
-                            !summary.isClockedIn
-                              ? "You are not clocked in"
-                              : isClockOutDisabled
-                                ? "Maximum work duration of 15 hours exceeded"
-                                : ""
-                          }
-                        >
-                          {loadingOut ? (
-                            <>
-                              <span
-                                className="spinner-border spinner-border-sm me-2"
-                                role="status"
-                                aria-hidden="true"
-                              ></span>
-                              Clocking Out...
-                            </>
-                          ) : (
-                            <>
-                              <DoorOpen className="me-2" size={18} />
-                              Clock Out
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </Col>
-                  </Row>
-                )}
-              </Card.Body>
-            </Card>
-
-            <Row className="g-4 mb-5">
-              <Col xs={12} sm={6} md={4}>
-                <Card className="text-center border-0 shadow-sm rounded-4">
-                  <Card.Body>
-                    <h6 className="text-muted">THIS WEEK</h6>
-                    <h2 className="fw-bold">
-                      {loadingSummary ? (
-                        <Spinner animation="border" size="sm" />
-                      ) : (
-                        `${summary.weekHours.toFixed(2)} hrs`
-                      )}
-                    </h2>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col xs={12} sm={6} md={4}>
-                <Card className="text-center border-0 shadow-sm rounded-4">
-                  <Card.Body>
-                    <h6 className="text-muted">THIS MONTH</h6>
-                    <h2 className="fw-bold">
-                      {loadingSummary ? (
-                        <Spinner animation="border" size="sm" />
-                      ) : (
-                        `${summary.monthHours.toFixed(2)} hrs`
-                      )}
-                    </h2>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col xs={12} sm={6} md={4}>
-                <Card className="text-center border-0 shadow-sm rounded-4">
-                  <Card.Body>
-                    <h6 className="text-muted">ATTENDANCE</h6>
-                    <h2 className="fw-bold">
-                      {loadingSummary ? (
-                        <Spinner animation="border" size="sm" />
-                      ) : (
-                        `${summary.attendanceDays} days`
-                      )}
-                    </h2>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-
-            {!loadingSummary && summary.recentAttendance.length > 0 && (
-              <Card className="border-0 shadow-sm rounded-4 mb-4">
-                <Card.Body className="p-4">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                      <h4 className="fw-bold mb-1">Recent Attendance</h4>
-                      <p className="text-muted mb-0">
-                        Your recent attendance records
-                      </p>
-                    </div>
-                    <div>
-                      <Link onClick={() => setShowDropdown(!showDropdown)}>
-                        <ThreeDots className="text-secondary" />
-                      </Link>
-                      <Dropdown
-                        show={showDropdown}
-                        onClick={() => setShowDropdown(false)}
-                      >
-                        <Dropdown.Toggle
-                          as="div"
-                          className="text-secondary absent-dropdown-toggle"
-                        ></Dropdown.Toggle>
-                        <Dropdown.Menu>
-                          <Dropdown.Item>Request to clock in</Dropdown.Item>
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    </div>
-                  </div>
-                  <div className="table-responsive">
-                    <Table
-                      hover
-                      responsive
-                      borderless
-                      striped
-                      className="align-middle mb-0"
-                    >
-                      <thead className="bg-light">
-                        <tr>
-                          <th>Date</th>
-                          <th>Att. Status</th>
-                          <th>Adj. Status</th>
-                          <th>Time</th>
-                          <th>Hours</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {summary.recentAttendance.map((record, index) => (
-                          <tr key={record.id || index}>
-                            <td className="fw-medium">
-                              {formatDate(record.clock_in)}
-                            </td>
-                            <td>
-                              {record.status === "Present" ? (
-                                <Badge bg="success" className="px-3 py-2">
-                                  Present
-                                </Badge>
-                              ) : record.status === "Pending" ? (
-                                <Badge bg="warning" className="px-3 py-2">
-                                  Pending
-                                </Badge>
-                              ) : (
-                                <Badge bg="danger" className="px-3 py-2">
-                                  Absent
-                                </Badge>
-                              )}
-                            </td>
-                            <td>
-                              {record.adjustment_status === "approved" ? (
-                                <Badge bg="success" className="px-3 py-2">
-                                  Approved
-                                </Badge>
-                              ) : record.adjustment_status === "pending" ? (
-                                <Badge bg="warning" className="px-3 py-2">
-                                  Pending
-                                </Badge>
-                              ) : (
-                                <Badge bg="secondary" className="px-3 py-2">
-                                  No Adjustment Set
-                                </Badge>
-                              )}
-                            </td>
-                            <td>
-                              {formatTimeRange(
-                                record.clock_in,
-                                record.clock_out,
-                              )}
-                            </td>
-                            <td>{formatHoursWorked(record.hours_worked)}</td>
-                            <td>
-                              <Button
-                                variant="outline-primary"
-                                size="sm"
-                                className="px-3"
-                                onClick={() => handleOpenAdjustModal(record)}
-                              >
-                                Adjust
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </div>
-                </Card.Body>
-              </Card>
-            )}
-
-            {!loadingSummary && summary.recentAttendance.length === 0 && (
-              <Card className="border-0 shadow-sm rounded-4 mb-4">
-                <Card.Body className="p-5 text-center">
-                  <p className="text-muted mb-0">
-                    No recent attendance records found.
-                  </p>
-                </Card.Body>
-              </Card>
-            )}
-          </>
+          <OverviewTab
+            formattedDate={formattedDate}
+            formattedTime={formattedTime}
+            loadingSummary={loadingSummary}
+            badgeVariant={badgeVariant}
+            badgeText={badgeText}
+            summary={summary}
+            liveHoursToday={liveHoursToday}
+            statusText={statusText}
+            handleClockIn={handleClockIn}
+            handleOpenAdjustModal={handleOpenAdjustModal}
+            setShowReportModal={setShowReportModal}
+            loadingIn={loadingIn}
+            loadingOut={loadingOut}
+            isClockOutDisabled={isClockOutDisabled}
+            showDropdown={showDropdown}
+            setShowDropdown={setShowDropdown}
+            formatDate={formatDate}
+            formatTimeRange={formatTimeRange}
+            formatHoursWorked={formatHoursWorked}
+          />
         )}
 
         {/* ========== MODERN REDESIGNED PRESENT & ABSENT TAB ========== */}
         {activeTab === "presentAbsent" && (
-          <div className="present-absent-wrapper">
-            {/* Filter Section with Request Button */}
-            <Card className="border-0 shadow-sm rounded-4 mb-4  bg-gradient">
-              <Card.Body className="p-4">
-                <Row className="align-items-end g-3">
-                  <Col xs={12} md={3}>
-                    <Form.Group>
-                      <Form.Label className="fw-semibold text-muted small text-uppercase">
-                        <CalendarDate className="me-1" /> Month
-                      </Form.Label>
-                      <Form.Select
-                        value={selectedMonth}
-                        onChange={(e) =>
-                          setSelectedMonth(parseInt(e.target.value))
-                        }
-                        className="rounded-3 border-0 shadow-sm"
-                      >
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map(
-                          (m) => (
-                            <option key={m} value={m}>
-                              {new Date(2000, m - 1, 1).toLocaleString(
-                                "default",
-                                {
-                                  month: "long",
-                                },
-                              )}
-                            </option>
-                          ),
-                        )}
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-
-                  <Col xs={12} md={3}>
-                    <Form.Group>
-                      <Form.Label className="fw-semibold text-muted small text-uppercase">
-                        <ClockHistory className="me-1" /> Year
-                      </Form.Label>
-                      <Form.Select
-                        value={selectedYear}
-                        onChange={(e) =>
-                          setSelectedYear(parseInt(e.target.value))
-                        }
-                        className="rounded-3 border-0 shadow-sm"
-                      >
-                        {Array.from(
-                          { length: 5 },
-                          (_, i) => new Date().getFullYear() - 2 + i,
-                        ).map((y) => (
-                          <option key={y} value={y}>
-                            {y}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-
-                  <Col xs={12} md={6} className="d-flex justify-content-md-end">
-                    <div className="d-flex align-items-center">
-                      <OverlayTrigger
-                        trigger={["hover", "focus"]}
-                        placement="left"
-                        overlay={popover}
-                      >
-                        <span className="d-inline-flex">
-                          <QuestionCircle
-                            className="text-muted me-2"
-                            size={18}
-                            style={{ cursor: "pointer" }}
-                          />
-                        </span>
-                      </OverlayTrigger>
-
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="rounded-3 px-3 shadow-sm"
-                        onClick={() => {
-                          setSelectedRecord(null);
-                          setForgotClockInForm({
-                            adjustedClockDate: "",
-                            adjustedClockIn: "",
-                            adjustedClockOut: "",
-                            reason: "",
-                          });
-                          setShowForgotModal(true);
-                        }}
-                      >
-                        <PersonBadge className="me-2" size={20} />
-                        Request Clock In
-                      </Button>
-                    </div>
-                  </Col>
-                </Row>
-              </Card.Body>
-            </Card>
-
-            {/* Summary Stats */}
-            <Row className="g-3 mb-4">
-              <Col xs={6} md={3}>
-                <Card className="border-0 shadow-sm rounded-4 text-center  bg-opacity-10">
-                  <Card.Body className="py-3">
-                    <h6 className="text-muted small text-uppercase">Month</h6>
-                    <h5 className="fw-bold mb-0">
-                      {new Date(2000, selectedMonth - 1, 1).toLocaleString(
-                        "default",
-                        {
-                          month: "short",
-                        },
-                      )}{" "}
-                      {selectedYear}
-                    </h5>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col xs={6} md={3}>
-                <Card className="border-0 shadow-sm rounded-4 text-center  bg-opacity-10">
-                  <Card.Body className="py-3">
-                    <h6 className="text-muted small text-uppercase">Present</h6>
-                    <h5 className="fw-bold mb-0 ">
-                      {filteredAttendance.length} days
-                    </h5>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col xs={6} md={3}>
-                <Card className="border-0 shadow-sm rounded-4 text-center bg-opacity-10">
-                  <Card.Body className="py-3">
-                    <h6 className="text-muted small text-uppercase">Absent</h6>
-                    <h5 className="fw-bold mb-0 ">{absentDates.length} days</h5>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col xs={6} md={3}>
-                <Card className="border-0 shadow-sm rounded-4 text-center bg-opacity-10">
-                  <Card.Body className="py-3">
-                    <h6 className="text-muted small text-uppercase">Total</h6>
-                    <h5 className="fw-bold mb-0">
-                      {filteredAttendance.length + absentDates.length} days
-                    </h5>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-
-            {/* Present & Absent Tables */}
-            <Row className="g-4">
-              {/* Present Days */}
-              <Col xs={12} md={12}>
-                <Card className="border-0 shadow-sm rounded-4 h-100">
-                  <Card.Header className="bg-white border-0 pt-4 pb-0 px-4">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <h5 className="fw-bold mb-0">Present Days</h5>
-                    </div>
-                  </Card.Header>
-                  <Card.Body className="p-4">
-                    {loadingPresentAbsent ? (
-                      <div className="text-center py-5">
-                        <Spinner animation="border" variant="primary" />
-                      </div>
-                    ) : filteredAttendance.length > 0 ? (
-                      <div className="table-responsive">
-                        <Table
-                          borderless
-                          hover
-                          striped
-                          className="align-middle mb-0"
-                        >
-                          <thead className="text-muted small">
-                            <tr>
-                              <th>Date</th>
-                              <th>Clock In</th>
-                              <th>Clock Out</th>
-                              <th>Hours</th>
-                              <th>Status</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredAttendance.map((record, idx) => (
-                              <tr key={record.id || idx}>
-                                <td className="fw-medium">
-                                  {new Date(record.clock_in).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      month: "short",
-                                      day: "numeric",
-                                    },
-                                  )}
-                                </td>
-                                <td>
-                                  <Clock
-                                    size={14}
-                                    className="text-muted me-1"
-                                  />
-                                  {formatTime(record.clock_in)}
-                                </td>
-                                <td>
-                                  {record.clock_out ? (
-                                    <>
-                                      <DoorOpen
-                                        size={14}
-                                        className="text-muted me-1"
-                                      />
-                                      {formatTime(record.clock_out)}
-                                    </>
-                                  ) : (
-                                    "—"
-                                  )}
-                                </td>
-                                <td>{formatHours(record.hours_worked)}h</td>
-                                <td>
-                                  {record.clock_out === null && (
-                                    <Badge
-                                      bg="secondary"
-                                      className=" px-3 py-2 rounded"
-                                    >
-                                      On Duty
-                                    </Badge>
-                                  )}
-                                  {record.clock_out !== null && (
-                                    <Badge
-                                      bg={
-                                        record.status === "Present"
-                                          ? "success"
-                                          : record.status === "Missed"
-                                            ? "info"
-                                            : "danger"
-                                      }
-                                      className="px-3 py-2 rounded"
-                                    >
-                                      {record.status}
-                                    </Badge>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </Table>
-                      </div>
-                    ) : (
-                      <div className="text-center py-5 text-muted">
-                        <p className="mb-0">
-                          No present records for this month
-                        </p>
-                      </div>
-                    )}
-                  </Card.Body>
-                </Card>
-              </Col>
-
-              {/* Absent Days */}
-              <Col xs={12} md={12}>
-                <Card className="border-0 shadow-sm rounded-4 h-100">
-                  <Card.Header className="bg-white border-0 pt-4 pb-0 px-4">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <h5 className="fw-bold mb-0">Absent Days</h5>
-                    </div>
-                  </Card.Header>
-                  <Card.Body className="p-4">
-                    {loadingPresentAbsent ? (
-                      <div className="text-center py-5">
-                        <Spinner animation="border" variant="primary" />
-                      </div>
-                    ) : absentDates.length > 0 ? (
-                      <div className="table-responsive">
-                        <Table borderless hover className="align-middle mb-0">
-                          <thead className="text-muted small">
-                            <tr>
-                              <th>Date</th>
-                              <th>Status</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {absentDates.map((date, idx) => (
-                              <tr key={idx}>
-                                <td className="fw-medium">
-                                  {new Date(date).toLocaleDateString("en-US", {
-                                    weekday: "short",
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })}
-                                </td>
-                                <td>
-                                  <Badge
-                                    bg="danger"
-                                    className="px-3 py-2 rounded"
-                                  >
-                                    Absent
-                                  </Badge>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </Table>
-                      </div>
-                    ) : (
-                      <div className="text-center py-5 text-muted">
-                        <p className="mb-0">No absences for this month 🎉</p>
-                      </div>
-                    )}
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </div>
+          <PresentAbsentTab
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+            filteredAttendance={filteredAttendance}
+            absentDates={absentDates}
+            loadingPresentAbsent={loadingPresentAbsent}
+            formatTime={formatTime}
+            formatHours={formatHours}
+            setShowForgotModal={setShowForgotModal}
+            setForgotClockInForm={setForgotClockInForm}
+            popover={popover}
+          />
         )}
 
+        {/* EXPORT TAB CONTENT */}
+        {activeTab === "export" && <ExportTab
+          handleExport={handleExport}
+          loadingExport={loadingExport}
+          clearFilters={clearFilters}
+          setEndDate={setEndDate}
+          setStartDate={setStartDate}
+           />}
+
         {/* REPORT MODAL (Clock Out) */}
-        <Modal
+        <ReportClockOutModal
           show={showReportModal}
-          onHide={() => {
-            setShowReportModal(false);
-            setCcEmails("");
-            setReportSubject("");
-            setReportBody("");
-          }}
-          centered
-          size="lg"
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Daily Report (Clock Out)</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form>
-              <InputGroup className="mb-3">
-                <InputGroup.Text id="to-addon">TO</InputGroup.Text>
-                <Form.Control
-                  type="text"
-                  placeholder="hello@snlvirtualpartner.com"
-                  readOnly
-                  disabled
-                  aria-label="TO"
-                  aria-describedby="to-addon"
-                />
-              </InputGroup>
-
-              <InputGroup className="mb-3">
-                <InputGroup.Text id="cc-addon">CC</InputGroup.Text>
-                <Form.Control
-                  type="email"
-                  multiple
-                  value={ccEmails}
-                  onChange={(e) => setCcEmails(e.target.value)}
-                  placeholder="Enter email addresses separated by commas"
-                  aria-label="CC"
-                  aria-describedby="cc-addon"
-                />
-              </InputGroup>
-              <Form.Text className="text-muted mb-3 d-block">
-                Separate multiple emails with commas.
-              </Form.Text>
-
-              <InputGroup className="mb-3">
-                <InputGroup.Text id="subject-addon">Subject</InputGroup.Text>
-                <Form.Control
-                  type="text"
-                  placeholder="Daily report"
-                  value={reportSubject}
-                  onChange={(e) => setReportSubject(e.target.value)}
-                  aria-label="Subject"
-                  aria-describedby="subject-addon"
-                />
-              </InputGroup>
-
-              <RichTextEditor value={reportBody} onChange={setReportBody} />
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="px-3"
-              onClick={() => {
-                setShowReportModal(false);
-                setCcEmails("");
-                setReportSubject("");
-                setReportBody("");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              className="px-3"
-              onClick={handleReportSubmit}
-            >
-              Submit & Clock Out
-            </Button>
-          </Modal.Footer>
-        </Modal>
+          setShowReportModal={setShowReportModal}
+          ccEmails={ccEmails}
+          setCcEmails={setCcEmails}
+          reportSubject={reportSubject}
+          setReportSubject={setReportSubject}
+          reportBody={reportBody}
+          setReportBody={setReportBody}
+          handleReportSubmit={handleReportSubmit}
+        />
 
         {/* DTR ADJUSTMENT MODAL */}
-        <Modal
+        <DRTAdjustmentModal
           show={showAdjustModal}
-          onHide={handleCloseAdjustModal}
-          centered
-          size="lg"
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Request DTR Adjustment</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {selectedRecord && (
-              <>
-                <div className="mb-4">
-                  <h6 className="fw-bold mb-3">Original Times</h6>
-                  <Row>
-                    <Col md={6}>
-                      <div>
-                        <small className="text-muted">Clock In</small>
-                        <div className="d-flex align-items-center gap-2">
-                          <Clock size={18} className="text-primary" />
-                          <strong>{formatTime(selectedRecord.clock_in)}</strong>
-                        </div>
-                        <small className="text-muted">
-                          {new Date(selectedRecord.clock_in).toLocaleDateString(
-                            "en-US",
-                            {
-                              weekday: "short",
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            },
-                          )}
-                        </small>
-                      </div>
-                    </Col>
-                    <Col md={6}>
-                      <div>
-                        <small className="text-muted">Clock Out</small>
-                        <div className="d-flex align-items-center gap-2">
-                          <DoorOpen size={18} className="text-primary" />
-                          <strong>
-                            {selectedRecord.clock_out
-                              ? formatTime(selectedRecord.clock_out)
-                              : "Not clocked out"}
-                          </strong>
-                        </div>
-                      </div>
-                    </Col>
-                  </Row>
-                </div>
-
-                <hr />
-
-                <div className="mb-4">
-                  <h6 className="fw-bold mb-3">Adjusted Times</h6>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="fw-bold">
-                      Adjusted Clock In
-                    </Form.Label>
-                    <Form.Control
-                      type="time"
-                      name="adjustedClockIn"
-                      value={adjustmentForm.adjustedClockIn}
-                      onChange={handleAdjustmentFormChange}
-                    />
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="fw-bold">
-                      Adjusted Clock Out
-                    </Form.Label>
-                    <Form.Control
-                      type="time"
-                      name="adjustedClockOut"
-                      value={adjustmentForm.adjustedClockOut}
-                      onChange={handleAdjustmentFormChange}
-                    />
-                  </Form.Group>
-                  <small className="text-warning d-block mb-3">
-                    <Lightbulb size={16} className="me-1" />
-                    Use the time inputs above to adjust your times
-                  </small>
-                </div>
-
-                <div className="mb-4">
-                  <Form.Group>
-                    <Form.Label className="fw-bold">
-                      Reason for Adjustment
-                    </Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={4}
-                      name="reason"
-                      placeholder="Please explain why you need this adjustment..."
-                      value={adjustmentForm.reason}
-                      onChange={handleAdjustmentFormChange}
-                    />
-                  </Form.Group>
-                </div>
-
-                <div className="alert alert-info d-flex gap-2 mb-0">
-                  <span>💡</span>
-                  <span>
-                    Your adjustment request will be reviewed and approved by
-                    your supervisor. You'll be notified once it's processed.
-                  </span>
-                </div>
-              </>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              size="sm"
-              className="px-3"
-              variant="outline-secondary"
-              onClick={handleCloseAdjustModal}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              className="px-3"
-              onClick={handleSubmitAdjustment}
-            >
-              Submit Request
-            </Button>
-          </Modal.Footer>
-        </Modal>
+          handleClose={handleCloseAdjustModal}
+          selectedRecord={selectedRecord}
+          adjustmentForm={adjustmentForm}
+          handleAdjustmentFormChange={handleAdjustmentFormChange}
+          handleSubmitAdjustment={handleSubmitAdjustment}
+          formatTime={formatTime}
+        />
 
         {/* FORGOT CLOCK IN REQUEST MODAL */}
-        <Modal
+        <ForgotClockInModal
           show={showForgotModal}
-          onHide={handleCloseForgotClockInModal}
-          centered
-          size="md"
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Forgot Clock‑In Request</Modal.Title>
-          </Modal.Header>
-
-          <Modal.Body className="pt-2">
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-semibold">Date</Form.Label>
-                <Form.Select
-                  name="adjustedClockDate"
-                  value={forgotClockInForm.adjustedClockDate}
-                  onChange={handleForgotFormChange}
-                  required
-                  disabled={loading}
-                >
-                  <option value="">Select absent date</option>
-
-                  {absentDates.map((date, index) => (
-                    <option key={index} value={date}>
-                      {new Date(date).toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-
-              <Row className="g-3 mb-3">
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label className="fw-semibold">
-                      Clock In Time
-                    </Form.Label>
-                    <Form.Control
-                      type="time"
-                      name="adjustedClockIn"
-                      value={forgotClockInForm.adjustedClockIn}
-                      onChange={handleForgotFormChange}
-                      disabled={loading}
-                    />
-                  </Form.Group>
-                </Col>
-
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label className="fw-semibold">
-                      Clock Out Time
-                    </Form.Label>
-                    <Form.Control
-                      type="time"
-                      name="adjustedClockOut"
-                      value={forgotClockInForm.adjustedClockOut}
-                      onChange={handleForgotFormChange}
-                      disabled={loading}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-semibold">
-                  Reason for Request
-                </Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={4}
-                  name="reason"
-                  placeholder="Explain why you forgot to clock in..."
-                  value={forgotClockInForm.reason}
-                  onChange={handleForgotFormChange}
-                  disabled={loading}
-                />
-              </Form.Group>
-            </Form>
-          </Modal.Body>
-
-          <Modal.Footer className="border-0 pt-0">
-            <Button
-              variant="outline-secondary"
-              size="sm"
-              className="px-3"
-              onClick={handleCloseForgotClockInModal}
-            >
-              Cancel
-            </Button>
-
-            <Button
-              variant="primary"
-              className="px-3"
-              size="sm"
-              onClick={handleSubmitForgotClockInRequest}
-              disabled={loading}
-            >
-               {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  Submitting request...
-                </>
-              ) : (
-                "Submit Request"
-              )}
-              
-            </Button>
-          </Modal.Footer>
-        </Modal>
+          handleCloseForgotClockInModal={handleCloseForgotClockInModal}
+          forgotClockInForm={forgotClockInForm}
+          handleForgotFormChange={handleForgotFormChange}
+          handleSubmitForgotClockInRequest={handleSubmitForgotClockInRequest}
+          absentDates={absentDates}
+          loading={loading}
+        />
 
         {/* TOASTS */}
         <ToastContainer
@@ -1512,10 +703,8 @@ const Attendance = ({ setIsAuth }) => {
               delay={6000}
               autohide
               className={
-              t.type === "success"
-                ? "glb-toast-success"
-                : "glb-toast-danger"
-            }
+                t.type === "success" ? "glb-toast-success" : "glb-toast-danger"
+              }
             >
               <Toast.Body>{t.message}</Toast.Body>
             </Toast>

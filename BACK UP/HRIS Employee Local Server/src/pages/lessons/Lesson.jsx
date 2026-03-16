@@ -2,7 +2,7 @@
 import LessonSelection from "./components/LessonSelection";
 import Modules from "./components/Modules";
 import AdminLayout from "../../components/layout/Adminlayout";
-import axios from "../../config/axios";
+import api from "../../config/axios";
 
 const Lesson = ({ setIsAuth }) => {
   const [lessons, setLessons] = useState([]);
@@ -12,7 +12,7 @@ const Lesson = ({ setIsAuth }) => {
   useEffect(() => {
     const fetchLessons = async () => {
       try {
-        const res = await axios.get("/training/lessons");
+        const res = await api.get("/training/lessons");
         if (res.data.success) setLessons(res.data.lessons || []);
       } catch (err) {
         console.error("Failed to fetch lessons:", err);
@@ -26,7 +26,7 @@ const Lesson = ({ setIsAuth }) => {
     // Fetch full lesson structure when a lesson is selected
   const handleSelectLesson = async (lesson) => {
     try {
-      const res = await axios.get(`/training/lessons/${lesson.id}/structure`);
+      const res = await api.get(`/training/lessons/${lesson.id}/structure`);
       if (res.data.success) {
         setSelectedLesson(res.data.lesson);
       } else {
