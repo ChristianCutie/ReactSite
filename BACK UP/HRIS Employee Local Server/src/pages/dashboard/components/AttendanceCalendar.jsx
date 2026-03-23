@@ -72,7 +72,8 @@ const AttendanceCalendar = () => {
         setLoading(false);
       }
     };
-
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     fetchAttendance();
   }, [currentDate]);
 
@@ -228,15 +229,15 @@ const AttendanceCalendar = () => {
   };
 
   const renderPopover = (day) => {
-  const status = getStatusLabel(day);
-   return (
-    <Popover id={`popover-${day}`}>
-      <Popover.Body style={{ fontSize: "12px", textAlign: "center" }}>
-        {status}
-      </Popover.Body>
-    </Popover>
-  );
-};
+    const status = getStatusLabel(day);
+    return (
+      <Popover id={`popover-${day}`}>
+        <Popover.Body style={{ fontSize: "12px", textAlign: "center" }}>
+          {status}
+        </Popover.Body>
+      </Popover>
+    );
+  };
 
   /*
   |--------------------------------------------------------------------------

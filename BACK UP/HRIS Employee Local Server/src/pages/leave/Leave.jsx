@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Container,
   Row,
@@ -35,6 +35,8 @@ const Leave = ({ setIsAuth }) => {
   const [success, setSuccess] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
+    const hasFetched = useRef(false);
+
   // Form State
   const [formData, setFormData] = useState({
     leave_type_id: "",
@@ -47,6 +49,8 @@ const Leave = ({ setIsAuth }) => {
 
   // Fetch user data and leaves on component mount
   useEffect(() => {
+if (hasFetched.current) return;
+      hasFetched.current = true;
     fetchLeaves();
     fetchLeaveTypes();
     fetchLeaveBalances();

@@ -190,7 +190,7 @@ const Attendance = ({ setIsAuth }) => {
   useEffect(() => {
     if (!isAuth) {
       if (setIsAuth) setIsAuth(false);
-      navigate("/snl-hr-app");
+      navigate("/");
       return;
     }
   }, [isAuth, navigate, setIsAuth]);

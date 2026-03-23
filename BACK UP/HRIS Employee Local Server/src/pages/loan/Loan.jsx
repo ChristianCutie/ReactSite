@@ -72,6 +72,8 @@ const Loan = ({ setIsAuth }) => {
 
   // Fetch loans on mount and when filters change
   useEffect(() => {
+     if (hasFetched.current) return;
+    hasFetched.current = true;
     fetchLoans();
     fetchLoanTypes();
   }, [currentPage, statusFilter, searchTerm]);
@@ -317,11 +319,6 @@ const Loan = ({ setIsAuth }) => {
       return;
     }
   }, [isAuth, navigate]);
-
-  useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-  }, []);
 
   if (!isAuth) {
     return null;

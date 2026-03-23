@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import LessonSelection from "@/pages/lessons/components/LessonSelection";
 import Modules from "@/pages/lessons/components/Modules";
 import AdminLayout from "@/components/layout/Adminlayout";
@@ -13,6 +13,8 @@ const Lesson = ({ setIsAuth }) => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [loading, setLoading] = useState(true);
     const [isUnauthorized, setIsUnauthorized] = useState(false);
+
+      const hasFetched = useRef(false);
 
   useEffect(() => {
     const fetchLessons = async () => {
@@ -37,6 +39,8 @@ const Lesson = ({ setIsAuth }) => {
         setLoading(false);
       }
     };
+    if (hasFetched.current) return;
+      hasFetched.current = true;
     fetchLessons();
   }, []);
 
