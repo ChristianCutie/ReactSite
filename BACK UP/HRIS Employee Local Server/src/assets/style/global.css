@@ -29,6 +29,31 @@ html {
     sans-serif;
 }
 
+/* Loading animation */
+.loadingScreen {
+   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 1rem;
+}
+
+/* Global container*/
+
+.glb-container {
+  padding: 0;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Media Queries for responsive design - container*/
+
+@media (max-width: 768px) {
+  .glb-container {
+    padding: 1rem;
+  }
+}
 /* Toast Styles */
 .toast-container {
   position: fixed;
@@ -129,4 +154,49 @@ html {
   height: 80px;
   color: #333;
   margin-bottom: 20px;
+}
+
+/* Global Stats Card */
+.glb-stats-card{
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  height: 100%;
+}
+.glb-stats-card:hover {
+  background: #f9fafb;
+  border-color: #cbd5e1;
+}
+
+.glb-stat-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.glb-stat-info h5 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+.glb-stat-info p {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+.glb-stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: #334155;
 }

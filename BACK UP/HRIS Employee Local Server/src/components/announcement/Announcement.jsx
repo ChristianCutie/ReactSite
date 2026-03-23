@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Dropdown, Offcanvas } from "react-bootstrap";
 import { Megaphone } from "react-bootstrap-icons";
-import "../../components/layout/Adminlayout.css";
-import api from "../../config/axios";
+import "@/components/layout/Adminlayout.css";
+import api from "@/config/axios";
 
 const Announcement = () => {
   const [notifications, setNotifications] = useState([]);

@@ -1,11 +1,14 @@
-import React from "react";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
-import AdminLayout from "../../../components/layout/Adminlayout";
-import axios from "../../../config/axios";
-import { useAuth } from "../../../context/AuthContext";
+import React, { useState } from "react";
+import { Container, Row, Col, Card, Button, Alert } from "react-bootstrap";
+import AdminLayout from "@/components/layout/Adminlayout";
+import axios from "@/config/axios";
+import { useAuth } from "@/context/AuthContext";
+import Maintenance from "@/components/access/maintenance/Maintenance";
+
 
 const LessonSelection = ({ lessons = [], setSelectedLesson, setIsAuth }) => {
   const { user } = useAuth();
+  const [isUnauthorized, setIsUnauthorized] = useState(false);
 
   const downloadLessonCertificate = async (lesson) => {
     // try to fetch full lesson structure if not present
@@ -13,8 +16,20 @@ const LessonSelection = ({ lessons = [], setSelectedLesson, setIsAuth }) => {
     if (!lesson.modules) {
       try {
         const res = await axios.get(`/training/lessons/${lesson.id}/structure`);
-        if (res.data && res.data.success) full = res.data.lesson;
+        if (res.data && res.data.success) {
+          // Check for unauthorized access in the message
+          if (res.data.message && res.data.message.includes("Access denied")) {
+            setIsUnauthorized(true);
+            return;
+          }
+          full = res.data.lesson;
+        }
       } catch (err) {
+        // Handle 401 Unauthorized status
+        if (err.response && err.response.status === 401) {
+          setIsUnauthorized(true);
+          return;
+        }
         console.error('Failed to fetch lesson structure for download', err);
       }
     }
@@ -45,6 +60,18 @@ const LessonSelection = ({ lessons = [], setSelectedLesson, setIsAuth }) => {
   return (
     <AdminLayout setIsAuth={setIsAuth}>
       <Container fluid className="mt-4">
+        {isUnauthorized && (
+          <Row className="mb-4">
+            <Col>
+              <Alert variant="danger" dismissible onClose={() => setIsUnauthorized(false)}>
+                <Alert.Heading>⚠️ Unauthorized Access</Alert.Heading>
+                <p>
+                  You do not have permission to access this resource. Your session may have expired or your access privileges have been revoked. Please contact your administrator if you believe this is an error.
+                </p>
+              </Alert>
+            </Col>
+          </Row>
+        )}
         <Row className="mb-3">
           <Col>
             <h3>Available Lessons</h3>
@@ -55,18 +82,19 @@ const LessonSelection = ({ lessons = [], setSelectedLesson, setIsAuth }) => {
             <Col md={6} lg={4} key={lesson.id} className="mb-4">
               <Card className="h-100">
                 <Card.Body>
-                  <Card.Title>{lesson.lesson_title}</Card.Title>
+                  <Card.Title h6>{lesson.lesson_title}</Card.Title>
                   <Card.Text>
-                    {lesson.lesson_description || "No description"}
+                    <small>{lesson.lesson_description || "No description"}</small>
                   </Card.Text>
                 </Card.Body>
-                <Card.Footer className="d-flex justify-content-between align-items-center">
+                <Card.Footer className="d-flex justify-content-between align-items-center bg-white border-0 pb-3">
                   <Button
                     className="rounded-3 px-3 shadow-sm btn btn-seocondary btn-sm"
                     onClick={() => setSelectedLesson(lesson)}
                   >
                     Start Lesson
                   </Button>
+                  <small className="text-muted fst-italic small">{lesson.modules_count || 0} modules</small>
                   {(
                     lesson.completed || lesson.passed || (lesson.modules && lesson.modules.length > 0 && lesson.modules.every(m => m.completed))
                   ) && (
@@ -82,6 +110,11 @@ const LessonSelection = ({ lessons = [], setSelectedLesson, setIsAuth }) => {
               </Card>
             </Col>
           ))}
+          {lessons.length === 0 && (
+            <Col>
+              <Maintenance message="No lessons available at the moment. Please check back later." />
+            </Col>
+          )}
         </Row>
       </Container>
     </AdminLayout>

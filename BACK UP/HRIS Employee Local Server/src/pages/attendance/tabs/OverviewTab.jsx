@@ -1,15 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Row,
   Col,
   Badge,
-  Spinner,
   Button,
   Table,
   Dropdown,
+  Pagination,
 } from "react-bootstrap";
-import { Clock, DoorOpen, ThreeDots } from "react-bootstrap-icons";
+import {
+  Clock,
+  DoorOpen,
+  ThreeDots,
+  ChevronLeft,
+  ChevronRight,
+} from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 
 const OverviewTab = ({
@@ -33,6 +39,71 @@ const OverviewTab = ({
   formatTimeRange,
   formatHoursWorked,
 }) => {
+  const ROWS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset pagination when recent attendance data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [summary?.recentAttendance?.length]);
+
+  // Calculate paginated recent attendance data
+  const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+  const endIndex = startIndex + ROWS_PER_PAGE;
+  const paginatedRecentAttendance =
+    summary?.recentAttendance?.slice(startIndex, endIndex) || [];
+  const totalPages = Math.ceil(
+    (summary?.recentAttendance?.length || 0) / ROWS_PER_PAGE,
+  );
+
+  // Pagination component renderer
+  const PaginationControls = ({ currentPage, setCurrentPage, totalPages }) => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+        <div className="text-muted small">
+          Page {currentPage} of {totalPages}
+        </div>
+        <div className="pagination-controls">
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className="me-2"
+          >
+            <ChevronLeft size={16} /> Previous
+          </Button>
+
+          <div className="d-inline-flex gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "primary" : "outline-secondary"}
+                size="sm"
+                onClick={() => setCurrentPage(page)}
+                className="page-btn"
+                style={{ minWidth: "32px" }}
+              >
+                {page}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className="ms-2"
+          >
+            Next <ChevronRight size={16} />
+          </Button>
+        </div>
+      </div>
+    );
+  };
   return (
     <>
       <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
@@ -42,7 +113,11 @@ const OverviewTab = ({
         </div>
 
         {loadingSummary ? (
-          <Spinner animation="border" size="sm" />
+          <span
+            className="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          ></span>
         ) : (
           <Badge
             bg={badgeVariant}
@@ -58,7 +133,11 @@ const OverviewTab = ({
         <Card.Body className="p-3 p-md-4">
           {loadingSummary ? (
             <div className="text-center py-4">
-              <Spinner animation="border" />
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
             </div>
           ) : (
             <Row className="align-items-center">
@@ -110,7 +189,11 @@ const OverviewTab = ({
                   >
                     {loadingIn ? (
                       <>
-                        <span className="spinner-border spinner-border-sm me-2" />
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true"
+                        ></span>
                         Clocking In...
                       </>
                     ) : (
@@ -136,7 +219,11 @@ const OverviewTab = ({
                   >
                     {loadingOut ? (
                       <>
-                        <span className="spinner-border spinner-border-sm me-2" />
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true"
+                        ></span>
                         Clocking Out...
                       </>
                     ) : (
@@ -160,7 +247,11 @@ const OverviewTab = ({
               <h6 className="text-muted">THIS WEEK</h6>
               <h2 className="fw-bold">
                 {loadingSummary ? (
-                  <Spinner animation="border" size="sm" />
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                 ) : (
                   `${summary.weekHours.toFixed(2)} hrs`
                 )}
@@ -175,7 +266,11 @@ const OverviewTab = ({
               <h6 className="text-muted">THIS MONTH</h6>
               <h2 className="fw-bold">
                 {loadingSummary ? (
-                  <Spinner animation="border" size="sm" />
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                 ) : (
                   `${summary.monthHours.toFixed(2)} hrs`
                 )}
@@ -190,7 +285,11 @@ const OverviewTab = ({
               <h6 className="text-muted">ATTENDANCE</h6>
               <h2 className="fw-bold">
                 {loadingSummary ? (
-                  <Spinner animation="border" size="sm" />
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                 ) : (
                   `${summary.attendanceDays} days`
                 )}
@@ -246,7 +345,7 @@ const OverviewTab = ({
                 </thead>
 
                 <tbody>
-                  {summary.recentAttendance.map((record, index) => (
+                  {paginatedRecentAttendance.map((record, index) => (
                     <tr key={record.id || index}>
                       <td className="fw-medium">
                         {formatDate(record.clock_in)}
@@ -282,6 +381,7 @@ const OverviewTab = ({
                         <Button
                           variant="outline-primary"
                           size="sm"
+                          className="px-3"
                           onClick={() => handleOpenAdjustModal(record)}
                         >
                           Adjust
@@ -292,6 +392,11 @@ const OverviewTab = ({
                 </tbody>
               </Table>
             </div>
+            <PaginationControls
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
+            />
           </Card.Body>
         </Card>
       )}
@@ -299,4 +404,4 @@ const OverviewTab = ({
   );
 };
 
-export default OverviewTab;
+export default React.memo(OverviewTab);

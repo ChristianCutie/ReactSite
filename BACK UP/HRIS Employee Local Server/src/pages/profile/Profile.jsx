@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Profile.css";
-import ProfileEditModal from "../../components/ProfileEditModal";
-import AdminLayout from "../../components/layout/Adminlayout";
+import "@/pages/profile/Profile.css";
+import ProfileEditModal from "@/pages/profile/components/modal/profile/ProfileEditModal";
+import AdminLayout from "@/components/layout/Adminlayout";
 import { PencilSquare, CameraFill } from "react-bootstrap-icons";
-import api from "../../config/axios";
-import { useAuth } from "../../context/AuthContext";
-import "./../../assets/style/global.css";
-import coverPhoto from "../../assets/images/cover_photo.jpg";
+import api from "@/config/axios";
+import { useAuth } from "@/context/AuthContext";
+import "@/assets/style/global.css";
+import coverPhoto from "@/assets/images/cover_photo.jpg";
 import {
   Toast,
   ToastContainer,

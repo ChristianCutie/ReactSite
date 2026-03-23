@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Card, Button, Row, Col, OverlayTrigger, Popover } from "react-bootstrap";
+import { Card, Button, Popover } from "react-bootstrap";
 import { ChevronLeft, ChevronRight } from "react-bootstrap-icons";
-import api from "../../../config/axios";
-import "./AttendanceCalendar.css";
+import api from "@/config/axios";
+import "@/pages/dashboard/components/AttendanceCalendar.css";
 
 const AttendanceCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -390,4 +390,4 @@ const AttendanceCalendar = () => {
   );
 };
 
-export default AttendanceCalendar;
+export default React.memo(AttendanceCalendar);

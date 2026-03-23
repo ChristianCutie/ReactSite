@@ -5,20 +5,21 @@ import {
   Toast,
   ToastContainer,
   Popover,
+  Row,
 } from "react-bootstrap";
-import AdminLayout from "../../components/layout/Adminlayout";
-import api from "../../config/axios.js";
-import { useAuth } from "../../context/AuthContext.jsx";
+import AdminLayout from "@/components/layout/Adminlayout";
+import api from "@/config/axios.js";
+import { useAuth } from "@/context/AuthContext.jsx";
 import { ClockHistory, PersonBadge, Download } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
-import OverviewTab from "./tabs/OverviewTab.jsx";
-import PresentAbsentTab from "./tabs/PresentAbsentTab.jsx";
-import DRTAdjustmentModal from "./components/modals/DRTAdjustmentModal.jsx";
-import ReportClockOutModal from "./components/modals/ReportClockOutModal.jsx";
-import ForgotClockInModal from "./components/modals/ForgotClockInModal.jsx";
-import ExportTab from "./tabs/ExportTab.jsx";
-import "./Attendance.css";
-import "../../assets/style/global.css";
+import OverviewTab from "@/pages/attendance/tabs/OverviewTab.jsx";
+import PresentAbsentTab from "@/pages/attendance/tabs/PresentAbsentTab.jsx";
+import DRTAdjustmentModal from "@/pages/attendance/components/modals/DRTAdjustmentModal.jsx";
+import ReportClockOutModal from "@/pages/attendance/components/modals/ReportClockOutModal.jsx";
+import ForgotClockInModal from "@/pages/attendance/components/modals/ForgotClockInModal.jsx";
+import ExportTab from "@/pages/attendance/tabs/ExportTab.jsx";
+import "@/pages/attendance/Attendance.css";
+import "@/assets/style/global.css";
 
 const Attendance = ({ setIsAuth }) => {
   const { isAuth } = useAuth();
@@ -73,6 +74,7 @@ const Attendance = ({ setIsAuth }) => {
   // Present/Absent Tab
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [presentRecords, setPresentRecords] = useState([]);
   const [absentDates, setAbsentDates] = useState([]);
   const [loadingPresentAbsent, setLoadingPresentAbsent] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -151,6 +153,34 @@ const Attendance = ({ setIsAuth }) => {
     } catch (error) {
       showToast("Error loading absences: " + error.message, "danger");
       setAbsentDates([]);
+    } finally {
+      setLoadingPresentAbsent(false);
+    }
+  };
+
+  // ---------- FETCH PRESENT RECORDS FOR SELECTED MONTH ----------
+  const fetchMonthlyPresent = async (month, year) => {
+    setLoadingPresentAbsent(true);
+    try {
+      const response = await api.get("/my-attendance", {
+        params: { month, year },
+      });
+      if (response.data && response.data.attendance) {
+        setPresentRecords(response.data.attendance);
+      } else if (response.data && response.data.recentAttendance) {
+        const filtered = response.data.recentAttendance.filter((record) => {
+          if (!record.clock_in) return false;
+          const date = new Date(record.clock_in);
+          return date.getMonth() + 1 === month && date.getFullYear() === year;
+        });
+        setPresentRecords(filtered);
+      } else {
+        setPresentRecords([]);
+      }
+    } catch (error) {
+      console.error("Error loading present records:", error);
+      setPresentRecords([]);
+      showToast("Error loading attendance records: " + error.message, "danger");
     } finally {
       setLoadingPresentAbsent(false);
     }
@@ -523,21 +553,15 @@ const Attendance = ({ setIsAuth }) => {
     return `${h}h ${m}m`;
   };
 
-  // Filter recent attendance for selected month (used in Present & Absent tab)
+  // Filter attendance for selected month - use presentRecords from state
   const filteredAttendance = useMemo(() => {
-    return summary.recentAttendance.filter((record) => {
-      if (!record.clock_in) return false;
-      const date = new Date(record.clock_in);
-      return (
-        date.getMonth() + 1 === selectedMonth &&
-        date.getFullYear() === selectedYear
-      );
-    });
-  }, [summary.recentAttendance, selectedMonth, selectedYear]);
+    return presentRecords || [];
+  }, [presentRecords]);
 
-  // Fetch absences when Present & Absent tab is active and month/year changes
+  // Fetch both present records and absences when Present & Absent tab is active and month/year changes
   useEffect(() => {
     if (isAuth && activeTab === "presentAbsent") {
+      fetchMonthlyPresent(selectedMonth, selectedYear);
       fetchMonthlyAbsences(selectedMonth, selectedYear);
     }
   }, [selectedMonth, selectedYear, activeTab, isAuth]);
@@ -546,7 +570,7 @@ const Attendance = ({ setIsAuth }) => {
   if (isInitialLoading) {
     return (
       <AdminLayout setIsAuth={setIsAuth}>
-        <div className="profile-loading">
+        <div className="loadingScreen">
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading attendance...</span>
           </div>
@@ -572,27 +596,29 @@ const Attendance = ({ setIsAuth }) => {
 
   return (
     <AdminLayout setIsAuth={setIsAuth}>
-      <Container fluid className="attendance-container">
-        {/* HEADER */}
-        <div className="attendance-header">
-          <h2 className="attendance-title fw-bold">Attendance</h2>
-        </div>
-        <div className="align-items-center justify-content-start d-flex flex-wrap gap-3 mb-4">
-          {tabs.map((tab) => (
-            <Button
-              key={tab.key}
-              size="sm"
-              className="px-3"
-              variant={
-                activeTab === tab.key ? "secondary" : "outline-secondary"
-              }
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.icon}
-              <span className="ms-2">{tab.label}</span>
-            </Button>
-          ))}
-        </div>
+      <Container fluid className="glb-container">
+        <Row className="mb-4">
+          {/* HEADER */}
+          <div className="attendance-header">
+            <h2 className="attendance-title fw-bold">Attendance</h2>
+          </div>
+          <div className="align-items-center justify-content-start d-flex flex-wrap gap-3 mb-4">
+            {tabs.map((tab) => (
+              <Button
+                key={tab.key}
+                size="sm"
+                className="px-3"
+                variant={
+                  activeTab === tab.key ? "secondary" : "outline-secondary"
+                }
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.icon}
+                <span className="ms-2">{tab.label}</span>
+              </Button>
+            ))}
+          </div>
+        </Row>
 
         {/* OVERVIEW TAB CONTENT */}
         {activeTab === "overview" && (

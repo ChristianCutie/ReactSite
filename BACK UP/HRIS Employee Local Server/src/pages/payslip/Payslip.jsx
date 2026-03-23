@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import PayslipPDF from "../../components/payslip/PayslipPDF";
+import { useAuth } from "@/context/AuthContext";
+import PayslipPDF from "@/components/payslip/PayslipPDF";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { useRef } from "react";
-import "./Payslip.css";
+import "@/pages/payslip/Payslip.css";
 import Offcanvas from "react-bootstrap/Offcanvas";
-import api from "../../config/axios";
-import AdminLayout from "../../components/layout/Adminlayout";
+import api from "@/config/axios";
+import AdminLayout from "@/components/layout/Adminlayout";
 import {
   Container,
   Row,
@@ -302,14 +301,14 @@ const Payslip = ({ setIsAuth }) => {
           {/* Search Bar */}
           <div className="search-section mb-4 mt-4">
             <InputGroup className="payslip-search">
-              <InputGroup.Text className="search-icon">
+              <InputGroup.Text className="search-icon bg-white">
                 <Search size={18} />
               </InputGroup.Text>
               <Form.Control
                 placeholder="Search payslips or remarks..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="payslip-search-input"
+                className=" p-2 shadow-none"
               />
             </InputGroup>
           </div>

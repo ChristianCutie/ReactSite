@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Card, Button, Row, Col, Spinner } from "react-bootstrap";
+import React, { useState, useCallback, useMemo } from "react";
+import { Card, Button, Row, Col } from "react-bootstrap";
 import { FileEarmarkRuled } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
-import PayslipPDF from "../../../components/payslip/PayslipPDF";
-import api from "../../../config/axios";
+import PayslipPDF from "@/components/payslip/PayslipPDF";
+import api from "@/config/axios";
 import ReactDOM from "react-dom/client";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -11,12 +11,15 @@ import jsPDF from "jspdf";
 const RecentPayslip = ({ recentPayslips = [], pdfRef }) => {
   const [downloadingId, setDownloadingId] = useState(null);
 
-  const formatPeso = (value) =>
-    new Intl.NumberFormat("en-PH", {
-      style: "currency",
-      currency: "PHP",
-      minimumFractionDigits: 2,
-    }).format(value);
+  const formatPeso = useCallback(
+    (value) =>
+      new Intl.NumberFormat("en-PH", {
+        style: "currency",
+        currency: "PHP",
+        minimumFractionDigits: 2,
+      }).format(value),
+    [],
+  );
 
   //-------------- Download payslip PDF-------------- //
   const downloadPayslipPDF = async (payslipId) => {
@@ -133,14 +136,11 @@ const RecentPayslip = ({ recentPayslips = [], pdfRef }) => {
                     >
                       {downloadingId === p.id ? (
                         <>
-                          <Spinner
-                            as="span"
-                            animation="border"
-                            size="sm"
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
                             role="status"
                             aria-hidden="true"
-                            className="me-2"
-                          />
+                          ></span>
                           Downloading...
                         </>
                       ) : (
@@ -158,4 +158,4 @@ const RecentPayslip = ({ recentPayslips = [], pdfRef }) => {
   );
 };
 
-export default RecentPayslip;
+export default React.memo(RecentPayslip);

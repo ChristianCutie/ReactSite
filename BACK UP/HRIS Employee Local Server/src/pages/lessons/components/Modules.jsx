@@ -10,10 +10,10 @@ import {
   Alert,
 } from "react-bootstrap";
 import { JournalX, ExclamationCircle } from "react-bootstrap-icons";
-import AdminLayout from "../../../components/layout/Adminlayout";
-import axios from "../../../config/axios";
-import { useAuth } from "../../../context/AuthContext";
-import "./../../../assets/style/global.css";
+import AdminLayout from "@/components/layout/Adminlayout";
+import axios from "@/config/axios";
+import { useAuth } from "@/context/AuthContext";
+import "@/assets/style/global.css";
 
 const Modules = ({ lesson, goBack, setIsAuth }) => {
   const [currentModule, setCurrentModule] = useState(0);

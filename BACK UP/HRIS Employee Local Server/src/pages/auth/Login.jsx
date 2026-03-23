@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css";
-import api from "../../config/axios";
+import "@/pages/auth/Login.css";
+import api from "@/config/axios";
 import { Toast, ToastContainer } from "react-bootstrap";
-import { useAuth } from "../../context/AuthContext";
-import "./../../assets/style/global.css";
+import { useAuth } from "@/context/AuthContext";
+import "@/assets/style/global.css";
 import { EyeFill, EyeSlashFill } from "react-bootstrap-icons";
 
 const Login = ({ setIsAuth }) => {

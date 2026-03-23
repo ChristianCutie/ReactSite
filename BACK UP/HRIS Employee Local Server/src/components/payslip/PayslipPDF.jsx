@@ -1,5 +1,5 @@
 import React, { forwardRef } from "react";
-import "./PayslipPDF.css";
+import "@/components/payslip/PayslipPDF.css";
 
 const PayslipPDF = forwardRef(({ payslip, formatPeso }, ref) => {
   if (!payslip) return null;

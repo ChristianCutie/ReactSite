@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Card, Table, Button, Modal, Row, Col } from "react-bootstrap";
 import { JournalText, Eye } from "react-bootstrap-icons";
 
@@ -7,16 +7,16 @@ const RecentReport = ({ recentReports = [] }) => {
   const [selectedReport, setSelectedReport] = useState(null);
 
   // Helper function to strip HTML and truncate text
-  const getPlainText = (html) => {
+  const getPlainText = useCallback((html) => {
     if (!html) return "No details provided";
     const doc = new DOMParser().parseFromString(html, "text/html");
     return doc.body.textContent || "";
-  };
+  }, []);
 
-  const truncateText = (text, maxLength = 50) => {
+  const truncateText = useCallback((text, maxLength = 50) => {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + "...";
-  };
+  }, []);
 
   return (
     <>
@@ -178,4 +178,4 @@ const RecentReport = ({ recentReports = [] }) => {
   );
 };
 
-export default RecentReport;
+export default React.memo(RecentReport);

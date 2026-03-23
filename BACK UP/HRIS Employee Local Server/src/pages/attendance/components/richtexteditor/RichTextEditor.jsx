@@ -1,8 +1,8 @@
+import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
-import React from 'react';
-import './RichTextEditor.css'; // we'll create this next
+import '@/pages/attendance/components/richtexteditor/RichTextEditor.css';
 
 const RichTextEditor = ({ value, onChange, placeholder, readOnly = false }) => {
   const editor = useEditor({

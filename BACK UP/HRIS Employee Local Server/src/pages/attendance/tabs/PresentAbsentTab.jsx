@@ -1,14 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Row,
   Col,
   Table,
-  Spinner,
   Badge,
   Form,
   Button,
   OverlayTrigger,
+  Pagination,
 } from "react-bootstrap";
 import {
   CalendarDate,
@@ -17,6 +17,8 @@ import {
   QuestionCircle,
   Clock,
   DoorOpen,
+  ChevronLeft,
+  ChevronRight,
 } from "react-bootstrap-icons";
 
 const PresentAbsentTab = ({
@@ -33,6 +35,81 @@ const PresentAbsentTab = ({
   setForgotClockInForm,
   popover,
 }) => {
+  const ROWS_PER_PAGE = 10;
+  const [currentPresentPage, setCurrentPresentPage] = useState(1);
+  const [currentAbsentPage, setCurrentAbsentPage] = useState(1);
+
+  // Reset pagination when month/year changes
+  useEffect(() => {
+    setCurrentPresentPage(1);
+    setCurrentAbsentPage(1);
+  }, [selectedMonth, selectedYear]);
+
+  // Calculate paginated present data
+  const presentStartIndex = (currentPresentPage - 1) * ROWS_PER_PAGE;
+  const presentEndIndex = presentStartIndex + ROWS_PER_PAGE;
+  const paginatedPresent = filteredAttendance.slice(
+    presentStartIndex,
+    presentEndIndex,
+  );
+  const totalPresentPages = Math.ceil(
+    filteredAttendance.length / ROWS_PER_PAGE,
+  );
+
+  // Calculate paginated absent data
+  const absentStartIndex = (currentAbsentPage - 1) * ROWS_PER_PAGE;
+  const absentEndIndex = absentStartIndex + ROWS_PER_PAGE;
+  const paginatedAbsent = absentDates.slice(absentStartIndex, absentEndIndex);
+  const totalAbsentPages = Math.ceil(absentDates.length / ROWS_PER_PAGE);
+
+  // Pagination component renderer
+  const PaginationControls = ({ currentPage, setCurrentPage, totalPages }) => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+        <div className="text-muted small">
+          Page {currentPage} of {totalPages}
+        </div>
+        <div className="pagination-controls">
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className="me-2"
+          >
+            <ChevronLeft size={16} /> Previous
+          </Button>
+
+          <div className="d-inline-flex gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "primary" : "outline-secondary"}
+                size="sm"
+                onClick={() => setCurrentPage(page)}
+                className="page-btn"
+                style={{ minWidth: "32px" }}
+              >
+                {page}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className="ms-2"
+          >
+            Next <ChevronRight size={16} />
+          </Button>
+        </div>
+      </div>
+    );
+  };
   return (
     <div className="present-absent-wrapper">
       {/* FILTER SECTION */}
@@ -114,7 +191,6 @@ const PresentAbsentTab = ({
                     setShowForgotModal(true);
                   }}
                 >
-                  <PersonBadge className="me-2" size={20} />
                   Request Clock In
                 </Button>
               </div>
@@ -144,9 +220,7 @@ const PresentAbsentTab = ({
           <Card className="border-0 shadow-sm rounded-4 text-center">
             <Card.Body className="py-3">
               <h6 className="text-muted small text-uppercase">Present</h6>
-              <h5 className="fw-bold mb-0">
-                {filteredAttendance.length} days
-              </h5>
+              <h5 className="fw-bold mb-0">{filteredAttendance.length} days</h5>
             </Card.Body>
           </Card>
         </Col>
@@ -183,82 +257,98 @@ const PresentAbsentTab = ({
             <Card.Body className="p-4">
               {loadingPresentAbsent ? (
                 <div className="text-center py-5">
-                  <Spinner animation="border" variant="primary" />
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                 </div>
               ) : filteredAttendance.length > 0 ? (
-                <div className="table-responsive">
-                  <Table borderless hover striped className="align-middle mb-0">
-                    <thead className="text-muted small">
-                      <tr>
-                        <th>Date</th>
-                        <th>Clock In</th>
-                        <th>Clock Out</th>
-                        <th>Hours</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {filteredAttendance.map((record, idx) => (
-                        <tr key={record.id || idx}>
-                          <td className="fw-medium">
-                            {new Date(record.clock_in).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                              },
-                            )}
-                          </td>
-
-                          <td>
-                            <Clock size={14} className="text-muted me-1" />
-                            {formatTime(record.clock_in)}
-                          </td>
-
-                          <td>
-                            {record.clock_out ? (
-                              <>
-                                <DoorOpen
-                                  size={14}
-                                  className="text-muted me-1"
-                                />
-                                {formatTime(record.clock_out)}
-                              </>
-                            ) : (
-                              "—"
-                            )}
-                          </td>
-
-                          <td>{formatHours(record.hours_worked)}h</td>
-
-                          <td>
-                            {record.clock_out === null && (
-                              <Badge bg="secondary" className="px-3 py-2">
-                                On Duty
-                              </Badge>
-                            )}
-
-                            {record.clock_out !== null && (
-                              <Badge
-                                bg={
-                                  record.status === "Present"
-                                    ? "success"
-                                    : record.status === "Missed"
-                                      ? "info"
-                                      : "danger"
-                                }
-                                className="px-3 py-2"
-                              >
-                                {record.status}
-                              </Badge>
-                            )}
-                          </td>
+                <>
+                  <div className="table-responsive">
+                    <Table
+                      borderless
+                      hover
+                      striped
+                      className="align-middle mb-0"
+                    >
+                      <thead className="text-muted small">
+                        <tr>
+                          <th>Date</th>
+                          <th>Clock In</th>
+                          <th>Clock Out</th>
+                          <th>Hours</th>
+                          <th>Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </div>
+                      </thead>
+
+                      <tbody>
+                        {paginatedPresent.map((record, idx) => (
+                          <tr key={record.id || idx}>
+                            <td className="fw-medium">
+                              {new Date(record.clock_in).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                },
+                              )}
+                            </td>
+
+                            <td>
+                              <Clock size={14} className="text-muted me-1" />
+                              {formatTime(record.clock_in)}
+                            </td>
+
+                            <td>
+                              {record.clock_out ? (
+                                <>
+                                  <DoorOpen
+                                    size={14}
+                                    className="text-muted me-1"
+                                  />
+                                  {formatTime(record.clock_out)}
+                                </>
+                              ) : (
+                                "—"
+                              )}
+                            </td>
+
+                            <td>{formatHours(record.hours_worked)}h</td>
+
+                            <td>
+                              {record.clock_out === null && (
+                                <Badge bg="secondary" className="px-3 py-2">
+                                  On Duty
+                                </Badge>
+                              )}
+
+                              {record.clock_out !== null && (
+                                <Badge
+                                  bg={
+                                    record.status === "Present"
+                                      ? "success"
+                                      : record.status === "Missed"
+                                        ? "info"
+                                        : "danger"
+                                  }
+                                  className="px-3 py-2"
+                                >
+                                  {record.status}
+                                </Badge>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                  <PaginationControls
+                    currentPage={currentPresentPage}
+                    setCurrentPage={setCurrentPresentPage}
+                    totalPages={totalPresentPages}
+                  />
+                </>
               ) : (
                 <div className="text-center py-5 text-muted">
                   No present records for this month
@@ -278,40 +368,51 @@ const PresentAbsentTab = ({
             <Card.Body className="p-4">
               {loadingPresentAbsent ? (
                 <div className="text-center py-5">
-                  <Spinner animation="border" />
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                 </div>
               ) : absentDates.length > 0 ? (
-                <div className="table-responsive">
-                  <Table borderless hover className="align-middle mb-0">
-                    <thead className="text-muted small">
-                      <tr>
-                        <th>Date</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {absentDates.map((date, idx) => (
-                        <tr key={idx}>
-                          <td className="fw-medium">
-                            {new Date(date).toLocaleDateString("en-US", {
-                              weekday: "short",
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                          </td>
-
-                          <td>
-                            <Badge bg="danger" className="px-3 py-2">
-                              Absent
-                            </Badge>
-                          </td>
+                <>
+                  <div className="table-responsive">
+                    <Table borderless hover className="align-middle mb-0">
+                      <thead className="text-muted small">
+                        <tr>
+                          <th>Date</th>
+                          <th>Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </div>
+                      </thead>
+
+                      <tbody>
+                        {paginatedAbsent.map((date, idx) => (
+                          <tr key={idx}>
+                            <td className="fw-medium">
+                              {new Date(date).toLocaleDateString("en-US", {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </td>
+
+                            <td>
+                              <Badge bg="danger" className="px-3 py-2">
+                                Absent
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                  <PaginationControls
+                    currentPage={currentAbsentPage}
+                    setCurrentPage={setCurrentAbsentPage}
+                    totalPages={totalAbsentPages}
+                  />
+                </>
               ) : (
                 <div className="text-center py-5 text-muted">
                   No absences for this month 🎉
@@ -325,4 +426,4 @@ const PresentAbsentTab = ({
   );
 };
 
-export default PresentAbsentTab;
+export default React.memo(PresentAbsentTab);

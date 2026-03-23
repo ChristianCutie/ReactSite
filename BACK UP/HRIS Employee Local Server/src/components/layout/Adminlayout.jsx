@@ -7,14 +7,14 @@ import {
   PersonLinesFill,
 } from "react-bootstrap-icons";
 import { Toast, ToastContainer } from "react-bootstrap";
-import Sidebar from "./Sidebar.jsx";
-import ChangePasswordModal from "../ChangePasswordModal.jsx";
-import "./AdminLayout.css";
+import Sidebar from "@/components/layout/sidebar/Sidebar.jsx";
+import ChangePasswordModal from "@/pages/auth/components/changepassword/ChangePasswordModal.jsx";
+import "@/components/layout/AdminLayout.css";
 import api from "../../config/axios.js";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext.jsx";
-import Announcement from "../announcement/Announcement.jsx";
-import "../../assets/style/global.css";
+import { useAuth } from "@/context/AuthContext.jsx";
+import Announcement from "@/components/announcement/Announcement.jsx";
+import "@/assets/style/global.css";
 
 /**
  * AdminLayout is a higher-order component that wraps the main content

@@ -7,13 +7,16 @@
 .leave-header {
   margin-bottom: 2rem;
   padding: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .leave-title {
-  color: #003d82;
-  font-weight: 700;
-  margin: 0;
   font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
 }
 
 /* Leave Sections */
@@ -98,6 +101,280 @@
   background-color: #1d4ed8;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   color: white;
+}
+
+.btn-request-leave-inline:active {
+  background-color: #1e40af;
+}
+
+/* Leave Balance Cards */
+.leave-balance-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+
+.leave-balance-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.leave-balance-card .card-body {
+  padding: 1.5rem;
+}
+
+.leave-balance-type {
+  color: #003d82;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  margin-top: 0;
+}
+
+.leave-balance-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 1rem;
+}
+
+.balance-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.balance-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.balance-value-primary {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.balance-value-secondary {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0ea5e9;
+}
+
+.balance-unit {
+  display: block;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+.balance-separator {
+  font-size: 1.5rem;
+  color: #d1d5db;
+}
+
+/* Leave Requests Table */
+.leave-table-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.leave-table-card .card-body {
+  padding: 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.leave-requests-table {
+  font-size: 0.95rem;
+}
+
+.leave-table-header {
+  background-color: #f3f4f6;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.leave-table-header th {
+  color: #003d82;
+  font-weight: 700;
+  padding: 1rem;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.leave-table-row {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+.leave-table-row:hover {
+  background-color: #f9fafb;
+}
+
+.leave-table-row td {
+  padding: 1rem;
+  vertical-align: middle;
+  color: #374151;
+}
+
+.leave-type {
+  color: #003d82;
+  font-weight: 600;
+}
+
+.leave-reason {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Modal Styling */
+.modal-content {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.modal-header {
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+  color: #003d82;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.modal-header .btn-close {
+  filter: brightness(0.5);
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.modal-footer {
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 1.5rem;
+}
+
+.form-label {
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-control,
+.form-select {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-control::placeholder {
+  color: #9ca3af;
+}
+
+/* Alert Styling */
+.alert {
+  border-radius: 8px;
+  border: 1px solid;
+}
+
+.alert-info {
+  background-color: #f0f9ff;
+  border-color: #0ea5e9;
+  color: #0369a1;
+}
+
+.alert-danger {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #7f1d1d;
+}
+
+.alert-success {
+  background-color: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+}
+
+/* Badge Styling */
+.badge {
+  padding: 0.4rem 0.8rem;
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .leave-title {
+    font-size: 1.5rem;
+  }
+
+  .section-header-inline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .leave-balance-display {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .balance-separator {
+    display: none;
+  }
+
+  .leave-table-row td {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .leave-table-header th {
+    padding: 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .leave-reason {
+    max-width: 150px;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
 }
 
 .btn-request-leave-inline:active {

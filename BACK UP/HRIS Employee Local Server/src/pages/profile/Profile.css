@@ -6,7 +6,7 @@
 }
 
 /* Loading and Error States */
-.profile-loading,
+.loadingScreen,
 .profile-error {
   display: flex;
   justify-content: center;

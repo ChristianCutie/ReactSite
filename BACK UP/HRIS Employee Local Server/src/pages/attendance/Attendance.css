@@ -9,10 +9,10 @@
 }
 
 .attendance-title {
-  color: #003d82 !important;
-  font-weight: 700;
-  margin: 0;
   font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
 }
 @media (max-width: 576px) {
   .attendance-title {
@@ -57,12 +57,12 @@
 /* Summary Cards */
 .card.text-center {
   border: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s;
 }
 .card.text-center:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .card.text-center h6 {
   font-size: 0.9rem;
@@ -133,7 +133,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #2563EB;
+  background: #2563eb;
   color: white;
   border-radius: 12px 12px 0 0;
 }
@@ -148,17 +148,16 @@
 video {
   transform: scaleX(-1);
 }
-.ProseMirror{
+.ProseMirror {
   max-height: 350px;
   overflow: auto;
 }
-.absent-dropdown-toggle::after{
-display: none !important;
+.absent-dropdown-toggle::after {
+  display: none !important;
 }
 .present-absent-wrapper .card {
   transition: all 0.2s ease;
 }
-
 
 .attendance-modern-table thead th {
   font-size: 13px;
@@ -177,4 +176,77 @@ display: none !important;
 
 .attendance-modern-table td {
   padding: 14px 10px;
+}
+
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-controls .btn {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.pagination-controls .btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-controls .btn-primary {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.pagination-controls .btn-primary:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.pagination-controls .btn-outline-secondary {
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+
+.pagination-controls .btn-outline-secondary:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #1f2937;
+}
+
+.pagination-controls .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-btn {
+  transition: all 0.2s ease;
+}
+
+.page-btn.active {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+@media (max-width: 768px) {
+  .pagination-controls {
+    gap: 0.25rem;
+    justify-content: space-between;
+  }
+
+  .pagination-controls .btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .page-btn {
+    min-width: 28px !important;
+    font-size: 0.7rem;
+  }
 }

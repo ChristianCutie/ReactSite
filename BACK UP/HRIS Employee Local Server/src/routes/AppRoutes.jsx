@@ -1,15 +1,27 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "../pages/auth/Login.jsx";
-import Dashboard from "../pages/dashboard/dashboard.jsx";
-import Leave from "../pages/leave/Leave.jsx";
-import Attendance from "../pages/attendance/Attendance.jsx";
-import Loan from "../pages/loan/Loan.jsx";
-import Payslip from "../pages/payslip/Payslip.jsx";
-import Profile from "../pages/profile/Profile.jsx";
-import Lesson from "../pages/lessons/Lesson.jsx";
-import Modules from "../pages/lessons/components/Modules.jsx";
 import { useEffect } from "react";
+import "@/assets/style/global.css";
+
+// Lazy load all route components
+const Login = lazy(() => import("@/pages/auth/Login.jsx"));
+const Dashboard = lazy(() => import("@/pages/dashboard/dashboard.jsx"));
+const Leave = lazy(() => import("@/pages/leave/Leave.jsx"));
+const Attendance = lazy(() => import("@/pages/attendance/Attendance.jsx"));
+const Loan = lazy(() => import("@/pages/loan/Loan.jsx"));
+const Payslip = lazy(() => import("@/pages/payslip/Payslip.jsx"));
+const Profile = lazy(() => import("@/pages/profile/Profile.jsx"));
+const Lesson = lazy(() => import("@/pages/lessons/Lesson.jsx"));
+const Modules = lazy(() => import("@/pages/lessons/components/Modules.jsx"));
+
+// Loading component
+const LoadingScreen = () => (
+  <div className="loadingScreen">
+    <div className="spinner-border text-primary" role="status">
+      <span className="visually-hidden">Loading...</span>
+    </div>
+  </div>
+);
 
 const AppRoutes = ({ isAuth, setIsAuth }) => {
   useEffect(() => {
@@ -20,76 +32,78 @@ const AppRoutes = ({ isAuth, setIsAuth }) => {
   }, [setIsAuth]);
 
   return (
-    <Routes>
-      {/* Login */}
-      <Route
-        path="/"
-        element={
-          isAuth ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Login setIsAuth={setIsAuth} />
-          )
-        }
-      />
+    <Suspense fallback={<LoadingScreen />}>
+      <Routes>
+        {/* Login */}
+        <Route
+          path="/"
+          element={
+            isAuth ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Login setIsAuth={setIsAuth} />
+            )
+          }
+        />
 
-      {/* Protected routes */}
-      <Route
-        path="/dashboard"
-        element={
-          isAuth ? (
-            <Dashboard setIsAuth={setIsAuth} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        {/* Protected routes */}
+        <Route
+          path="/dashboard"
+          element={
+            isAuth ? (
+              <Dashboard setIsAuth={setIsAuth} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-      <Route
-        path="/attendance"
-        element={
-          isAuth ? (
-            <Attendance setIsAuth={setIsAuth} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/attendance"
+          element={
+            isAuth ? (
+              <Attendance setIsAuth={setIsAuth} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-      <Route
-        path="/leave"
-        element={
-          isAuth ? <Leave setIsAuth={setIsAuth} /> : <Navigate to="/" replace />
-        }
-      />
+        <Route
+          path="/leave"
+          element={
+            isAuth ? <Leave setIsAuth={setIsAuth} /> : <Navigate to="/" replace />
+          }
+        />
 
-      <Route
-        path="/loan"
-        element={
-          isAuth ? <Loan setIsAuth={setIsAuth} /> : <Navigate to="/" replace />
-        }
-      />
-      <Route
-        path="/payslip"
-        element={
-          isAuth ? (
-            <Payslip setIsAuth={setIsAuth} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/loan"
+          element={
+            isAuth ? <Loan setIsAuth={setIsAuth} /> : <Navigate to="/" replace />
+          }
+        />
+        <Route
+          path="/payslip"
+          element={
+            isAuth ? (
+              <Payslip setIsAuth={setIsAuth} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-      <Route
-        path="/profile"
-        element={
-          isAuth ? (
-            <Profile isAuth={isAuth} setIsAuth={setIsAuth} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/profile"
+          element={
+            isAuth ? (
+              <Profile isAuth={isAuth} setIsAuth={setIsAuth} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
         <Route
           path="/lessons"
           element={
@@ -100,6 +114,7 @@ const AppRoutes = ({ isAuth, setIsAuth }) => {
             )
           }
         />
+
         <Route
           path="/lessons/module"
           element={
@@ -109,12 +124,12 @@ const AppRoutes = ({ isAuth, setIsAuth }) => {
               <Navigate to="/" replace />
             )
           }
-          />
-        )
+        />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 };
 

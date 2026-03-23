@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Button, Form, InputGroup } from "react-bootstrap";
-import RichTextEditor from "../richtexteditor/RichTextEditor";
+import RichTextEditor from "@/pages/attendance/components/richtexteditor/RichTextEditor";
 
 const ReportClockOutModal = ({
   show,

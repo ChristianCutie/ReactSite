@@ -1,26 +1,50 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
-import AdminLayout from "../../components/layout/Adminlayout";
+import AdminLayout from "@/components/layout/Adminlayout";
 import {
   PersonFillCheck,
   FileEarmarkRuledFill,
   ClipboardDataFill,
   CashCoin,
+  Eye,
+  EyeSlash,
 } from "react-bootstrap-icons";
-import RecentReport from "./components/RecentReport";
-import RecentPayslip from "./components/RecentPayslip";
-import Overview from "./components/Overview";
-import AttendanceCalendar from "./components/AttendanceCalendar";
-import api from "../../config/axios";
+import RecentReport from "@/pages/dashboard/components/RecentReport";
+import RecentPayslip from "@/pages/dashboard/components/RecentPayslip";
+import Overview from "@/pages/dashboard/components/Overview";
+import AttendanceCalendar from "@/pages/dashboard/components/AttendanceCalendar";
+import api from "@/config/axios";
 import "./Dashboard.css";
+import "@/assets/style/global.css";
+
+// Memoize child components to prevent unnecessary re-renders
+const MemoizedRecentReport = React.memo(RecentReport);
+const MemoizedRecentPayslip = React.memo(RecentPayslip);
+const MemoizedOverview = React.memo(Overview);
+const MemoizedAttendanceCalendar = React.memo(AttendanceCalendar);
 
 const Dashboard = ({ setIsAuth }) => {
-  const iconMap = {
-    "person-fill-check": <PersonFillCheck />,
-    "file-earmark-ruled-fill": <FileEarmarkRuledFill />,
-    "clipboard-data-fill": <ClipboardDataFill />,
-    "cash-coin": <CashCoin />,
-  };
+  const [hidePayValues, setHidePayValues] = useState({
+    grossPay: true,
+    netPay: true,
+  });
+
+  const togglePayVisibility = useCallback((payType) => {
+    setHidePayValues((prev) => ({
+      ...prev,
+      [payType]: !prev[payType],
+    }));
+  }, []);
+
+  const iconMap = useMemo(
+    () => ({
+      "person-fill-check": <PersonFillCheck />,
+      "file-earmark-ruled-fill": <FileEarmarkRuledFill />,
+      "clipboard-data-fill": <ClipboardDataFill />,
+      "cash-coin": <CashCoin />,
+    }),
+    [],
+  );
 
   const [stats, setStats] = useState([
     {
@@ -123,11 +147,11 @@ const Dashboard = ({ setIsAuth }) => {
 
   return (
     <AdminLayout setIsAuth={setIsAuth}>
-      <Container fluid className="dashboard-container">
+      <Container fluid className="glb-container">
         {error && <div className="alert alert-danger">{error}</div>}
 
         {loading ? (
-          <div className="profile-loading">
+          <div className="loadingScreen">
             <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Loading dashboard...</span>
             </div>
@@ -151,8 +175,46 @@ const Dashboard = ({ setIsAuth }) => {
                   <Card className="stat-card-modern">
                     <Card.Body className="stat-content">
                       <div className="stat-info">
-                        <p>{stat.label}</p>
-                        <h5>{stat.value}</h5>
+                        <div className="d-flex align-items-center justify-content-start">
+                          <p>{stat.label}
+                        </p>
+                         <span>{(stat.id === 3 || stat.id === 4) && (
+                            <button
+                              className="eye-toggle-btn mb-2 ms-2"
+                              onClick={() =>
+                                togglePayVisibility(
+                                  stat.id === 3 ? "grossPay" : "netPay"
+                                )
+                              }
+                              title={
+                                stat.id === 3
+                                  ? hidePayValues.grossPay
+                                    ? "Show gross pay"
+                                    : "Hide gross pay"
+                                  : hidePayValues.netPay
+                                  ? "Show net pay"
+                                  : "Hide net pay"
+                              }
+                            >
+                              {stat.id === 3
+                                ? hidePayValues.grossPay
+                                  ? <EyeSlash />
+                                  : <Eye />
+                                : hidePayValues.netPay
+                                ? <EyeSlash />
+                                : <Eye />}
+                            </button>
+                          )}</span>
+                          </div> 
+                        <div className="stat-value-container">
+                          <h5>
+                            {(stat.id === 3 && hidePayValues.grossPay) ||
+                            (stat.id === 4 && hidePayValues.netPay)
+                              ? "••••••"
+                              : stat.value}
+                          </h5>
+                          
+                        </div>
                       </div>
                       <div className={`stat-icon stat-icon-${stat.color}`}>
                         {iconMap[stat.icon]}
@@ -166,26 +228,26 @@ const Dashboard = ({ setIsAuth }) => {
             <Row className="mb-4">
               {/* ATTENDANCE CHART */}
               <Col lg={6}>
-                <AttendanceCalendar />
+                <MemoizedAttendanceCalendar />
               </Col>
 
               {/* ATTENDANCE CALENDAR */}
               <Col lg={6}>
-                <Overview />
+                <MemoizedOverview />
               </Col>
             </Row>
 
             {/* RECENT REPORTS */}
             <Row className="mb-4">
               <Col>
-                <RecentReport recentReports={recentReports} />
+                <MemoizedRecentReport recentReports={recentReports} />
               </Col>
             </Row>
 
             {/* RECENT PAYSLIPS */}
             <Row>
               <Col>
-                <RecentPayslip recentPayslips={recentPayslips} />
+                <MemoizedRecentPayslip recentPayslips={recentPayslips} />
               </Col>
             </Row>
           </>
