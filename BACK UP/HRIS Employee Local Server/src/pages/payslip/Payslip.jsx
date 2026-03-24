@@ -220,7 +220,7 @@ const Payslip = ({ setIsAuth }) => {
   if (isLoading) {
     return (
       <AdminLayout setIsAuth={setIsAuth}>
-        <div className="profile-loading">
+        <div className="loadingScreen">
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading payslip...</span>
           </div>
