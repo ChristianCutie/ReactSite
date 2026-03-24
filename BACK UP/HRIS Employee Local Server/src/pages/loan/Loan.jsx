@@ -326,7 +326,7 @@ const Loan = ({ setIsAuth }) => {
   if (loading) {
     return (
       <AdminLayout setIsAuth={setIsAuth}>
-        <div className="profile-loading">
+        <div className="loadingScreen">
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading loan...</span>
           </div>
